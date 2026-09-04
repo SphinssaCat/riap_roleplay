@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: 'angst serif', Arial, sans-serif;
+            font-family: 'Georgia', 'Times New Roman', serif;
             background: #1a1a2e;
             color: #e0e0e0;
             min-height: 100vh;
@@ -71,15 +71,6 @@
             transform: translateX(6px);
         }
 
-        .count {
-            float: right;
-            background: #0f3460;
-            color: #a8b8d8;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-        }
-
         .back-link {
             display: inline-block;
             margin-bottom: 20px;
@@ -119,6 +110,42 @@
         .owner-link:hover {
             text-decoration: underline;
         }
+
+        /* Аватарка участника */
+        .participant-avatar {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #0f3460;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            display: block;
+            margin: 0 auto 20px auto;
+        }
+
+        /* Карточка персонажа */
+        .character-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            background: #16213e;
+            padding: 20px;
+            border-radius: 14px;
+            border-left: 4px solid #0f3460;
+        }
+
+        .character-card img {
+            width: 100px;
+            height: 100px;
+            min-width: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #e94560;
+        }
+
+        .character-info-text {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -137,104 +164,106 @@
     <!-- СТРАНИЦА УЧАСТНИКА (список его персонажей) -->
     <div id="participant-view" class="hidden">
         <span class="back-link" onclick="showMain()">← На главную</span>
-        <h2 id="participant-name"></h2>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <img id="participant-avatar" src="" alt="" class="participant-avatar" style="display: none;">
+            <h2 id="participant-name"></h2>
+        </div>
         <ul class="list" id="characters-list"></ul>
     </div>
 
-   <!-- СТРАНИЦА ПЕРСОНАЖА -->
-<div id="character-view" class="hidden">
-    <span class="back-link" onclick="showParticipant(currentParticipant)">← Назад</span>
-
-    <div class="character-card">
-        <img id="character-avatar" src="" alt="" width="100" height="100">
-        <div class="character-info-text">
-            <h2 id="character-name"></h2>
-            <div class="character-info" id="character-content"></div>
+    <!-- СТРАНИЦА ПЕРСОНАЖА -->
+    <div id="character-view" class="hidden">
+        <span class="back-link" onclick="showParticipant(currentParticipant)">← Назад</span>
+        <div class="character-card">
+            <img id="character-avatar" src="" alt="" style="display: none;">
+            <div class="character-info-text">
+                <h2 id="character-name"></h2>
+                <div class="character-info" id="character-content"></div>
+            </div>
         </div>
     </div>
-</div>
-
+</main>
 
 <script>
     // ===================================================
-    // ДАННЫЕ — весь список участников и их персонажей
-    // Чтобы добавить нового участника — допишите его сюда.
-    // Чтобы добавить персонажа — впишите имя в массив characters.
-    // Формат: { name: "Имя", characters: ["Персонаж1", "Персонаж2"] }
+    // ДАННЫЕ — весь список участников и их персонажей.
+    // Чтобы добавить участника — допишите новый объект в массив.
+    // Чтобы добавить персонажа — впишите его в массив characters.
+    // avatar — имя файла картинки в папке images/ (пустая строка = нет картинки).
+    // desc — описание персонажа (можно использовать HTML-теги: <b>, <br>, <i> и т.д.)
     // ===================================================
-   const data = [
-    {
-        name: "Генри",
-        avatar: "avatar-henry.png",
-        characters: [
-            { name: "Геката", desc: "..." }
-        ]
-    },
-    {
-        name: "Яра",
-        avatar: "avatar-yara.png",
-        characters: [
-            { name: "Элнир", desc: "..." },
-            { name: "Первый", desc: "..." }
-        ]
-    },
-    {
-        name: "Сфинкс",
-        avatar: "avatar-sphinx.png",
-        characters: [
-            { name: "Фео", desc: "..." },
-            { name: "Обскури", desc: "..." },
-            { name: "Кира", desc: "..." },
-            { name: "Азури", desc: "..." }
-        ]
-    },
-    {
-        name: "Витёк",
-        avatar: "avatar-vitek.png",
-        characters: [
-            { name: "Марк", desc: "..." },
-            { name: "Мия", desc: "..." },
-            { name: "Кейн", desc: "..." }
-        ]
-    },
-    {
-        name: "Репейник",
-        avatar: "avatar-rep.png",
-        characters: [
-            { name: "Даала", desc: "..." },
-            { name: "Кай", desc: "..." }
-        ]
-    },
-    {
-        name: "Марти",
-        avatar: "avatar-marty.png",
-        characters: [
-            { name: "Сорок Пять", desc: "..." }
-        ]
-    },
-    {
-        name: "Акарумей Окото",
-        avatar: "avatar-akarumei.png",
-        characters: [
-            { name: "Акарумей Окото", desc: "..." }
-        ]
-    },
-    {
-        name: "Ясик",
-        avatar: "avatar-yasik.png",
-        characters: [
-            { name: "Яс", desc: "..." }
-        ]
-    },
-    {
-        name: "Лиза",
-        avatar: "avatar-liza.png",
-        characters: [
-            { name: "Роберт", desc: "..." }
-        ]
-    }
-];
-
+    const data = [
+        {
+            name: "Генри",
+            avatar: "",
+            characters: [
+                { name: "Геката", desc: "Таинственная союзница Генри. Часто скрывает правду, чтобы защитить других — классический ложный антагонист." }
+            ]
+        },
+        {
+            name: "Яра",
+            avatar: "",
+            characters: [
+                { name: "Элнир", desc: "Спокойный, рассудительный. Всегда ищет компромисс." },
+                { name: "Первый", desc: "Энергичный и прямолинейный. Не любит ждать." }
+            ]
+        },
+        {
+            name: "Сфинкс",
+            avatar: "",
+            characters: [
+                { name: "Фео", desc: "Тихий наблюдатель. Знает больше, чем говорит." },
+                { name: "Обскури", desc: "Резкий, вспыльчивый. Действует, не думая." },
+                { name: "Кира", desc: "Дипломат. Умеет уговорить кого угодно." },
+                { name: "Азури", desc: "Мечтательница. Верит в лучшее даже в худшие дни." }
+            ]
+        },
+        {
+            name: "Витёк",
+            avatar: "",
+            characters: [
+                { name: "Марк", desc: "Прагматик. Считает, что чувства мешают делу." },
+                { name: "Мия", desc: "Оптимистка. Заряжает всех вокруг энергией." },
+                { name: "Кейн", desc: "Скептик. Всё проверяет дважды." }
+            ]
+        },
+        {
+            name: "Репейник",
+            avatar: "",
+            characters: [
+                { name: "Даала", desc: "Строгая, но справедливая. Держит всех в тонусе." },
+                { name: "Кай", desc: "Импульсивный, но преданный. Готов броситься в бой первым." }
+            ]
+        },
+        {
+            name: "Марти",
+            avatar: "",
+            characters: [
+                { name: "Сорок Пять", desc: "Загадочный номер вместо имени. О нём почти ничего не известно." }
+            ]
+        },
+        {
+            name: "Акарумей Окото",
+            avatar: "",
+            characters: [
+                { name: "Акарумей Окото", desc: "Двойственность имени — часть его образа. Он и участник, и персонаж." }
+            ]
+        },
+        {
+            name: "Ясик",
+            avatar: "",
+            characters: [
+                { name: "Яс", desc: "Простой и честный. Не любит усложнять." }
+            ]
+        },
+        {
+            name: "Лиза",
+            avatar: "",
+            characters: [
+                { name: "Роберт", desc: "Рассудительный и спокойный. Часто становится голосом разума." }
+            ]
+        }
+    ];
 
     // Текущий участник (нужен для возврата со страницы персонажа)
     let currentParticipant = 0;
@@ -248,65 +277,81 @@
     }
 
     // ОТОБРАЖЕНИЕ СТРАНИЦЫ УЧАСТНИКА
-   function showParticipant(index) {
-    currentParticipant = index;
-    const participant = data[index];
+    function showParticipant(index) {
+        // Если вызвано без аргумента (например, при загрузке) — ничего не делаем
+        if (index === undefined) return;
 
-    document.getElementById('page-title').textContent = participant.name;
-    document.getElementById('participant-name').textContent =
-        'Персонажи — ' + participant.name;
+        currentParticipant = index;
+        const participant = data[index];
 
-    const list = document.getElementById('characters-list');
-    list.innerHTML = '';
+        document.getElementById('page-title').textContent = participant.name;
+        document.getElementById('participant-name').textContent =
+            'Персонажи — ' + participant.name;
 
-    participant.characters.forEach((char, charIndex) => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.textContent = char.name;       // <-- исправлено
-        a.href = '#';
-        a.onclick = function(e) {
-            e.preventDefault();
-            showCharacter(index, charIndex);
-        };
-        li.appendChild(a);
-        list.appendChild(li);
-    });
+        // Аватарка участника
+        const avatarEl = document.getElementById('participant-avatar');
+        if (participant.avatar) {
+            avatarEl.src = 'images/' + participant.avatar;
+            avatarEl.style.display = 'block';
+        } else {
+            avatarEl.style.display = 'none';
+        }
 
-    document.getElementById('main-view').classList.add('hidden');
-    document.getElementById('participant-view').classList.remove('hidden');
-    document.getElementById('character-view').classList.add('hidden');
-}
+        // Список персонажей
+        const list = document.getElementById('characters-list');
+        list.innerHTML = '';
+        participant.characters.forEach(function(char, charIndex) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.textContent = char.name;
+            a.href = '#';
+            a.onclick = function(e) {
+                e.preventDefault();
+                showCharacter(index, charIndex);
+            };
+            li.appendChild(a);
+            list.appendChild(li);
+        });
 
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('participant-view').classList.remove('hidden');
+        document.getElementById('character-view').classList.add('hidden');
+    }
 
     // ОТОБРАЖЕНИЕ СТРАНИЦЫ ПЕРСОНАЖА
     function showCharacter(partIndex, charIndex) {
-    currentParticipant = partIndex;
-    const participant = data[partIndex];
-    const character = participant.characters[charIndex];
+        currentParticipant = partIndex;
+        const participant = data[partIndex];
+        const character = participant.characters[charIndex];
 
-    document.getElementById('page-title').textContent = character.name;
-    document.getElementById('character-name').textContent = character.name;
+        document.getElementById('page-title').textContent = character.name;
+        document.getElementById('character-name').textContent = character.name;
 
-    // Показываем описание
-    const contentEl = document.getElementById('character-content');
-    contentEl.innerHTML =
-        '<p><strong>Владелец:</strong> <span class="owner-link" onclick="showParticipant(' + partIndex + ')">' +
-        participant.name + '</span></p>' +
-        '<div style="margin-top: 20px; line-height: 1.6; color: #dcdcdc;">' +
-        character.desc +
-        '</div>';
+        // Описание персонажа
+        const contentEl = document.getElementById('character-content');
+        contentEl.innerHTML =
+            '<p><strong>Владелец:</strong> <span class="owner-link" onclick="showParticipant(' + partIndex + ')">' +
+            participant.name + '</span></p>' +
+            '<div style="margin-top: 20px; line-height: 1.6; color: #dcdcdc;">' +
+            character.desc +
+            '</div>';
 
-    // Подставляем аватарку персонажа (если есть)
-    const charAvatarEl = document.getElementById('character-avatar');
-    const charAvatarName = 'char-' + character.name.toLowerCase().replace(/\s+/g, '-') + '.png';
-    charAvatarEl.src = 'images/' + charAvatarName;
-    charAvatarEl.alt = character.name;
+        // Аватарка персонажа
+        const charAvatarEl = document.getElementById('character-avatar');
+        const charAvatarName = 'char-' + character.name.toLowerCase().replace(/\s+/g, '-') + '.png';
+        charAvatarEl.src = 'images/' + charAvatarName;
+        charAvatarEl.alt = character.name;
+        charAvatarEl.style.display = 'block';
 
-    document.getElementById('main-view').classList.add('hidden');
-    document.getElementById('participant-view').classList.add('hidden');
-    document.getElementById('character-view').classList.remove('hidden');
-}
+        // Если картинка не загрузилась — скрыть её
+        charAvatarEl.onerror = function() {
+            charAvatarEl.style.display = 'none';
+        };
 
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('participant-view').classList.add('hidden');
+        document.getElementById('character-view').classList.remove('hidden');
+    }
 
     // ЗАПОЛНЕНИЕ ГЛАВНОЙ СТРАНИЦЫ ПРИ ЗАГРУЗКЕ САЙТА
     window.onload = function() {
@@ -314,9 +359,7 @@
         data.forEach(function(participant, index) {
             const li = document.createElement('li');
             const a = document.createElement('a');
-            a.innerHTML = participant.name
-                + participant.characters.length
-                + '</span>';
+            a.textContent = participant.name;
             a.href = '#';
             a.onclick = function(e) {
                 e.preventDefault();
