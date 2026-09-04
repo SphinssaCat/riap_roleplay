@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Персонажи — Главная</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #16213e;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 3px solid #0f3460;
+        }
+
+        header h1 {
+            color: #e94560;
+            font-size: 2.2em;
+            margin-bottom: 5px;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        h2 {
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list li {
+            margin: 10px 0;
+        }
+
+        .list a {
+            display: block;
+            padding: 18px 24px;
+            background: #16213e;
+            color: #e0e0e0;
+            text-decoration: none;
+            border-radius: 10px;
+            border-left: 4px solid #0f3460;
+            font-size: 1.1em;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .list a:hover {
+            background: #0f3460;
+            border-left-color: #e94560;
+            transform: translateX(6px);
+        }
+
+        .count {
+            float: right;
+            background: #0f3460;
+            color: #a8b8d8;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #a8b8d8;
+            text-decoration: none;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .back-link:hover {
+            color: #e94560;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .character-info {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 30px;
+            border-left: 4px solid #0f3460;
+        }
+
+        .character-info p {
+            margin: 10px 0;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .owner-link {
+            color: #e94560;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .owner-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 id="page-title">Главная</h1>
+</header>
+
+<main>
+    <!-- ГЛАВНАЯ СТРАНИЦА (список участников) -->
+    <div id="main-view">
+        <h2>Участники</h2>
+        <ul class="list" id="participants-list"></ul>
+    </div>
+
+    <!-- СТРАНИЦА УЧАСТНИКА (список его персонажей) -->
+    <div id="participant-view" class="hidden">
+        <span class="back-link" onclick="showMain()">← На главную</span>
+        <h2 id="participant-name"></h2>
+        <ul class="list" id="characters-list"></ul>
+    </div>
+
+    <!-- СТРАНИЦА ПЕРСОНАЖА -->
+    <div id="character-view" class="hidden">
+        <span class="back-link" onclick="showParticipant()">← Назад</span>
+        <h2 id="character-name"></h2>
+        <div class="character-info" id="character-content"></div>
+    </div>
+</main>
+
+<script>
+    // ===================================================
+    // ДАННЫЕ — весь список участников и их персонажей
+    // Чтобы добавить нового участника — допишите его сюда.
+    // Чтобы добавить персонажа — впишите имя в массив characters.
+    // Формат: { name: "Имя", characters: ["Персонаж1", "Персонаж2"] }
+    // ===================================================
+    const data = [
+        { name: "Генри", characters: ["Геката"] },
+        { name: "Яра", characters: ["Элнир", "Первый"] },
+        { name: "Сфинкс", characters: ["Фео", "Обскури", "Кира", "Азури"] },
+        { name: "Витёк", characters: ["Марк", "Мия", "Кейн"] },
+        { name: "Репейник", characters: ["Даала", "Кай"] },
+        { name: "Марти", characters: ["Сорок Пять"] },
+        { name: "Акарумей Окото", characters: ["Акарумей Окото"] },
+        { name: "Ясик", characters: ["Яс"] },
+        { name: "Лиза", characters: ["Роберт"] }
+    ];
+
+    // Текущий участник (нужен для возврата со страницы персонажа)
+    let currentParticipant = 0;
+
+    // ОТОБРАЖЕНИЕ ГЛАВНОЙ СТРАНИЦЫ
+    function showMain() {
+        document.getElementById('page-title').textContent = 'Главная';
+        document.getElementById('main-view').classList.remove('hidden');
+        document.getElementById('participant-view').classList.add('hidden');
+        document.getElementById('character-view').classList.add('hidden');
+    }
+
+    // ОТОБРАЖЕНИЕ СТРАНИЦЫ УЧАСТНИКА
+    function showParticipant(index) {
+        currentParticipant = index;
+        const participant = data[index];
+
+        document.getElementById('page-title').textContent = participant.name;
+        document.getElementById('participant-name').textContent =
+            'Персонажи — ' + participant.name;
+
+        const list = document.getElementById('characters-list');
+        list.innerHTML = '';
+        participant.characters.forEach((char, charIndex) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.textContent = char;
+            a.href = '#';
+            a.onclick = function(e) {
+                e.preventDefault();
+                showCharacter(index, charIndex);
+            };
+            li.appendChild(a);
+            list.appendChild(li);
+        });
+
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('participant-view').classList.remove('hidden');
+        document.getElementById('character-view').classList.add('hidden');
+    }
+
+    // ОТОБРАЖЕНИЕ СТРАНИЦЫ ПЕРСОНАЖА
+    function showCharacter(partIndex, charIndex) {
+        currentParticipant = partIndex;
+        const participant = data[partIndex];
+        const character = participant.characters[charIndex];
+
+        document.getElementById('page-title').textContent = character;
+        document.getElementById('character-name').textContent = character;
+
+        document.getElementById('character-content').innerHTML =
+            '<p><strong>Владелец:</strong> <span class="owner-link" onclick="showParticipant('
+            + partIndex + ')">' + participant.name + '</span></p>' +
+            '<p style="margin-top: 20px;">Здесь будет описание персонажа <strong>'
+            + character + '</strong>.</p>';
+
+        document.getElementById('main-view').classList.add('hidden');
+        document.getElementById('participant-view').classList.add('hidden');
+        document.getElementById('character-view').classList.remove('hidden');
+    }
+
+    // ЗАПОЛНЕНИЕ ГЛАВНОЙ СТРАНИЦЫ ПРИ ЗАГРУЗКЕ САЙТА
+    window.onload = function() {
+        const list = document.getElementById('participants-list');
+        data.forEach(function(participant, index) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.innerHTML = participant.name
+                + ' <span class="count">'
+                + participant.characters.length
+                + '</span>';
+            a.href = '#';
+            a.onclick = function(e) {
+                e.preventDefault();
+                showParticipant(index);
+            };
+            li.appendChild(a);
+            list.appendChild(li);
+        });
+    };
+</script>
+
+</body>
+</html>
