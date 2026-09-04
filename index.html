@@ -272,23 +272,33 @@
 
     // ОТОБРАЖЕНИЕ СТРАНИЦЫ ПЕРСОНАЖА
     function showCharacter(partIndex, charIndex) {
-        currentParticipant = partIndex;
-        const participant = data[partIndex];
-        const character = participant.characters[charIndex];
+    currentParticipant = partIndex;
+    const participant = data[partIndex];
+    const character = participant.characters[charIndex];
 
-        document.getElementById('page-title').textContent = character;
-        document.getElementById('character-name').textContent = character;
+    document.getElementById('page-title').textContent = character.name;
+    document.getElementById('character-name').textContent = character.name;
 
-        document.getElementById('character-content').innerHTML =
-            '<p><strong>Владелец:</strong> <span class="owner-link" onclick="showParticipant('
-            + partIndex + ')">' + participant.name + '</span></p>' +
-            '<p style="margin-top: 20px;">Здесь будет описание персонажа <strong>'
-            + character + '</strong>.</p>';
+    // Показываем описание
+    const contentEl = document.getElementById('character-content');
+    contentEl.innerHTML =
+        '<p><strong>Владелец:</strong> <span class="owner-link" onclick="showParticipant(' + partIndex + ')">' +
+        participant.name + '</span></p>' +
+        '<div style="margin-top: 20px; line-height: 1.6; color: #dcdcdc;">' +
+        character.desc +
+        '</div>';
 
-        document.getElementById('main-view').classList.add('hidden');
-        document.getElementById('participant-view').classList.add('hidden');
-        document.getElementById('character-view').classList.remove('hidden');
-    }
+    // Подставляем аватарку персонажа (если есть)
+    const charAvatarEl = document.getElementById('character-avatar');
+    const charAvatarName = 'char-' + character.name.toLowerCase().replace(/\s+/g, '-') + '.png';
+    charAvatarEl.src = 'images/' + charAvatarName;
+    charAvatarEl.alt = character.name;
+
+    document.getElementById('main-view').classList.add('hidden');
+    document.getElementById('participant-view').classList.add('hidden');
+    document.getElementById('character-view').classList.remove('hidden');
+}
+
 
     // ЗАПОЛНЕНИЕ ГЛАВНОЙ СТРАНИЦЫ ПРИ ЗАГРУЗКЕ САЙТА
     window.onload = function() {
