@@ -141,13 +141,19 @@
         <ul class="list" id="characters-list"></ul>
     </div>
 
-    <!-- СТРАНИЦА ПЕРСОНАЖА -->
-    <div id="character-view" class="hidden">
-        <span class="back-link" onclick="showParticipant()">← Назад</span>
-        <h2 id="character-name"></h2>
-        <div class="character-info" id="character-content"></div>
+   <!-- СТРАНИЦА ПЕРСОНАЖА -->
+<div id="character-view" class="hidden">
+    <span class="back-link" onclick="showParticipant(currentParticipant)">← Назад</span>
+
+    <div class="character-card">
+        <img id="character-avatar" src="" alt="" width="100" height="100">
+        <div class="character-info-text">
+            <h2 id="character-name"></h2>
+            <div class="character-info" id="character-content"></div>
+        </div>
     </div>
-</main>
+</div>
+
 
 <script>
     // ===================================================
@@ -160,14 +166,14 @@
     {
         name: "Генри",
         avatar: "avatar-henry.png",
-        characters: ["Геката"
+        characters: [
             { name: "Геката", desc: "..." }
         ]
     },
     {
         name: "Яра",
         avatar: "avatar-yara.png",
-        characters: ["Элнир", "Первый"
+        characters: [
             { name: "Элнир", desc: "..." },
             { name: "Первый", desc: "..." }
         ]
@@ -175,7 +181,7 @@
     {
         name: "Сфинкс",
         avatar: "avatar-sphinx.png",
-        characters: ["Фео", "Обскури", " Кира", "Азури"
+        characters: [
             { name: "Фео", desc: "..." },
             { name: "Обскури", desc: "..." },
             { name: "Кира", desc: "..." },
@@ -185,7 +191,7 @@
     {
         name: "Витёк",
         avatar: "avatar-vitek.png",
-        characters: ["Марк", "Мия", "Кейн"
+        characters: [
             { name: "Марк", desc: "..." },
             { name: "Мия", desc: "..." },
             { name: "Кейн", desc: "..." }
@@ -194,7 +200,7 @@
     {
         name: "Репейник",
         avatar: "avatar-rep.png",
-        characters: ["Даала", "Кай"
+        characters: [
             { name: "Даала", desc: "..." },
             { name: "Кай", desc: "..." }
         ]
@@ -202,28 +208,28 @@
     {
         name: "Марти",
         avatar: "avatar-marty.png",
-        characters: ["Сорок Пять"
+        characters: [
             { name: "Сорок Пять", desc: "..." }
         ]
     },
     {
         name: "Акарумей Окото",
         avatar: "avatar-akarumei.png",
-        characters: ["Акарумей Окото"
+        characters: [
             { name: "Акарумей Окото", desc: "..." }
         ]
     },
     {
         name: "Ясик",
         avatar: "avatar-yasik.png",
-        characters: ["Яс"
+        characters: [
             { name: "Яс", desc: "..." }
         ]
     },
     {
         name: "Лиза",
         avatar: "avatar-liza.png",
-        characters: ["Роберт"
+        characters: [
             { name: "Роберт", desc: "..." }
         ]
     }
