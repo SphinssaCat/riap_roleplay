@@ -156,17 +156,79 @@
     // Чтобы добавить персонажа — впишите имя в массив characters.
     // Формат: { name: "Имя", characters: ["Персонаж1", "Персонаж2"] }
     // ===================================================
-    const data = [
-        { name: "Генри", characters: ["Геката"] },
-        { name: "Яра", characters: ["Элнир", "Первый"] },
-        { name: "Сфинкс", characters: ["Фео", "Обскури", "Кира", "Азури"] },
-        { name: "Витёк", characters: ["Марк", "Мия", "Кейн"] },
-        { name: "Репейник", characters: ["Даала", "Кай"] },
-        { name: "Марти", characters: ["Сорок Пять"] },
-        { name: "Акарумей Окото", characters: ["Акарумей Окото"] },
-        { name: "Ясик", characters: ["Яс"] },
-        { name: "Лиза", characters: ["Роберт"] }
-    ];
+   const data = [
+    {
+        name: "Генри",
+        avatar: "avatar-henry.png",
+        characters: [
+            { name: "Геката", desc: "" }
+        ]
+    },
+    {
+        name: "Яра",
+        avatar: "avatar-yara.png",
+        characters: [
+            { name: "Элнир", desc: "" },
+            { name: "Первый", desc: "" }
+        ]
+    },
+    {
+        name: "Сфинкс",
+        avatar: "avatar-sphinx.png",
+        characters: [
+            { name: "Фео", desc: "" },
+            { name: "Обскури", desc: "" },
+            { name: "Кира", desc: "" },
+            { name: "Азури", desc: "" }
+        ]
+    },
+    {
+        name: "Витёк",
+        avatar: "avatar-vitek.png",
+        characters: [
+            { name: "Марк", desc: "" },
+            { name: "Мия", desc: "" },
+            { name: "Кейн", desc: "" }
+        ]
+    },
+    {
+        name: "Репейник",
+        avatar: "avatar-rep.png",
+        characters: [
+            { name: "Даала", desc: "" },
+            { name: "Кай", desc: "" }
+        ]
+    },
+    {
+        name: "Марти",
+        avatar: "avatar-marty.png",
+        characters: [
+            { name: "Сорок Пять", desc: "" }
+        ]
+    },
+    {
+        name: "Акарумей Окото",
+        avatar: "avatar-akarumei.png",
+        characters: [
+            { name: "Акарумей Окото", desc: "" }
+        ]
+    },
+    {
+        name: "Ясик",
+        avatar: "avatar-yasik.png",
+        characters: [
+            { name: "Яс", desc: "" }
+        ]
+    },
+    {
+        name: "Лиза",
+        avatar: "avatar-liza.png",
+        characters: [
+            { name: "Роберт", desc: "" }
+        ]
+    }
+];
+
 
     // Текущий участник (нужен для возврата со страницы персонажа)
     let currentParticipant = 0;
