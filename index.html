@@ -261,7 +261,7 @@
         participant.characters.forEach((char, charIndex) => {
             const li = document.createElement('li');
             const a = document.createElement('a');
-            a.textContent = char;
+            a.textContent = char.name;
             a.href = '#';
             a.onclick = function(e) {
                 e.preventDefault();
