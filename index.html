@@ -248,33 +248,35 @@
     }
 
     // ОТОБРАЖЕНИЕ СТРАНИЦЫ УЧАСТНИКА
-    function showParticipant(index) {
-        currentParticipant = index;
-        const participant = data[index];
+   function showParticipant(index) {
+    currentParticipant = index;
+    const participant = data[index];
 
-        document.getElementById('page-title').textContent = participant.name;
-        document.getElementById('participant-name').textContent =
-            'Персонажи — ' + participant.name;
+    document.getElementById('page-title').textContent = participant.name;
+    document.getElementById('participant-name').textContent =
+        'Персонажи — ' + participant.name;
 
-        const list = document.getElementById('characters-list');
-        list.innerHTML = '';
-        participant.characters.forEach((char, charIndex) => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.textContent = char.name;
-            a.href = '#';
-            a.onclick = function(e) {
-                e.preventDefault();
-                showCharacter(index, charIndex);
-            };
-            li.appendChild(a);
-            list.appendChild(li);
-        });
+    const list = document.getElementById('characters-list');
+    list.innerHTML = '';
 
-        document.getElementById('main-view').classList.add('hidden');
-        document.getElementById('participant-view').classList.remove('hidden');
-        document.getElementById('character-view').classList.add('hidden');
-    }
+    participant.characters.forEach((char, charIndex) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.textContent = char.name;       // <-- исправлено
+        a.href = '#';
+        a.onclick = function(e) {
+            e.preventDefault();
+            showCharacter(index, charIndex);
+        };
+        li.appendChild(a);
+        list.appendChild(li);
+    });
+
+    document.getElementById('main-view').classList.add('hidden');
+    document.getElementById('participant-view').classList.remove('hidden');
+    document.getElementById('character-view').classList.add('hidden');
+}
+
 
     // ОТОБРАЖЕНИЕ СТРАНИЦЫ ПЕРСОНАЖА
     function showCharacter(partIndex, charIndex) {
