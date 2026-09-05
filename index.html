@@ -121,7 +121,7 @@
         .error-msg { color: #ff4d6d; text-align: center; padding: 20px; }
 
         .admin-badge {
-            position: fixed; top: 20px; right: 20px;
+            position: fixed; top: 20px; right: 20px; z-index: 50;
             background: rgba(147, 129, 255, 0.3);
             border: 1px solid rgba(147, 129, 255, 0.5);
             border-radius: 20px; padding: 6px 16px; font-size: 13px;
@@ -143,6 +143,7 @@
     </style>
 </head>
 <body>
+    <div id="admin-btn-container"></div>
     <div id="app"></div>
 
     <script>
@@ -203,7 +204,6 @@
             const clean = JSON.parse(JSON.stringify(data));
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(clean, null, 2))));
 
-            // Получаем актуальный SHA файла
             const curRes = await fetch(
                 `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}`,
                 { headers: { Authorization: `token ${this.token}` } }
@@ -301,8 +301,58 @@
         }
     };
 
-    // STATE
-    let state = { data: null, isAdmin: false, loading: true };
+    // STATE — isAdmin загружается из localStorage
+    let state = {
+        data: null,
+        isAdmin: localStorage.getItem('isAdmin') === 'true',
+        loading: true
+    };
+
+    // КНОПКА АДМИНА (всегда в правом верхнем углу)
+    function renderAdminBtn() {
+        const container = document.getElementById('admin-btn-container');
+        if (state.isAdmin) {
+            container.innerHTML = `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
+        } else {
+            container.innerHTML = `<div class="admin-badge"><button onclick="loginAdmin()">Войти</button></div>`;
+        }
+    }
+
+    // АДМИН: ВХОД
+    async function loginAdmin() {
+        const password = prompt('Введите пароль для редактирования:');
+        if (password === null) return false;
+        if (password !== CONFIG.adminPassword) { alert('Неверный пароль'); return false; }
+
+        let token = localStorage.getItem('gh_token');
+        if (!token) {
+            token = prompt('Введите ваш GitHub Personal Access Token\n(нужны права repo):');
+            if (!token || !token.trim()) return false;
+            localStorage.setItem('gh_token', token.trim());
+        }
+        GH.token = token.trim();
+        state.isAdmin = true;
+        localStorage.setItem('isAdmin', 'true');
+        renderAdminBtn();
+        route(); // перерисовать страницу, чтобы появились кнопки редактирования
+        return true;
+    }
+
+    // АДМИН: ВЫХОД
+    function logout() {
+        state.isAdmin = false;
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('gh_token');
+        GH.token = '';
+        renderAdminBtn();
+        route(); // перерисовать страницу, чтобы скрыть кнопки редактирования
+    }
+
+    // Проверка доступа при попытке редактировать
+    async function checkAdminAccess() {
+        if (state.isAdmin) return true;
+        return await loginAdmin();
+    }
 
     // ROUTER
     function route() {
@@ -330,7 +380,6 @@
 
         const participants = state.data.participants || [];
         let html = `<h1>Участники</h1>`;
-        if (state.isAdmin) html += `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
 
         if (participants.length === 0) {
             html += `<div class="empty-state">Пока нет ни одного участника</div>`;
@@ -368,7 +417,6 @@
             : `<div class="placeholder-img large">👤</div>`;
 
         let html = `<button class="btn btn-small back-btn" onclick="location.hash='/'">← Назад</button>`;
-        if (state.isAdmin) html += `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
 
         html += `<div class="participant-header">${photo}
             <h2>${escapeHtml(participant.name)}</h2>
@@ -418,7 +466,6 @@
             : `<div class="placeholder-img large">🎭</div>`;
 
         let html = `<button class="btn btn-small back-btn" onclick="location.hash='/participant/${pid}'">← Назад</button>`;
-        if (state.isAdmin) html += `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
         html += `<div class="participant-header">${photo}
             <h2>${escapeHtml(c.name)}</h2>
             <p>${escapeHtml(c.description || 'Описание не задано.')}</p>
@@ -430,24 +477,6 @@
         </div>`;
         app.innerHTML = html;
     }
-
-    // АДМИН: ВХОД/ВЫХОД
-    async function checkAdminAccess() {
-        if (state.isAdmin) return true;
-        const password = prompt('Введите пароль для редактирования:');
-        if (password === null) return false;
-        if (password !== CONFIG.adminPassword) { alert('Неверный пароль'); return false; }
-        let token = localStorage.getItem('gh_token');
-        if (!token) {
-            token = prompt('Введите ваш GitHub Personal Access Token\n(нужны права repo):');
-            if (!token || !token.trim()) return false;
-            localStorage.setItem('gh_token', token.trim());
-        }
-        GH.token = token.trim();
-        state.isAdmin = true;
-        return true;
-    }
-    function logout() { state.isAdmin = false; localStorage.removeItem('gh_token'); GH.token = ''; route(); }
 
     // ФОРМЫ
     function showForm(html) {
@@ -594,6 +623,7 @@
 
     // ИНИЦИАЛИЗАЦИЯ
     window.addEventListener('hashchange', route);
+    renderAdminBtn(); // рисуем кнопку сразу при загрузке
     route();
     </script>
 </body>
