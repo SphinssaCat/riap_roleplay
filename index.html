@@ -42,9 +42,11 @@
             transform: scale(1.03);
             background: rgba(255, 255, 255, 0.15);
         }
-        .card img {
-            width: 100px; height: 100px;
-            border-radius: 50%; object-fit: cover;
+        .card-preview-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 12px;
             margin-bottom: 10px;
         }
         .card h3 { margin-bottom: 8px; }
@@ -66,7 +68,6 @@
         .btn-danger { background: linear-gradient(135deg, #c9184a, #ff4d6d); }
         .btn-small { padding: 6px 14px; font-size: 13px; display: inline-block; margin: 0; }
 
-        /* Кнопки в ряд (добавить + сохранить) */
         .action-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
         .action-row .btn { margin: 0; width: auto; }
 
@@ -78,6 +79,7 @@
         .form-box {
             background: #1a1a2e; border: 1px solid rgba(255,255,255,0.2);
             border-radius: 16px; padding: 30px; width: 90%; max-width: 500px;
+            max-height: 90vh; overflow-y: auto;
         }
         .form-box h2 { margin-bottom: 20px; }
         .form-box input, .form-box textarea {
@@ -91,13 +93,9 @@
         .form-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
 
         .participant-header { text-align: center; margin-bottom: 30px; }
-        .participant-header img {
-            width: 150px; height: 150px; border-radius: 50%;
-            object-fit: cover; margin-bottom: 15px;
-        }
         
         .description-block p { margin-bottom: 12px; line-height: 1.6; }
-.description-block p:last-child { margin-bottom: 0; }
+        .description-block p:last-child { margin-bottom: 0; }
 
         .back-btn { position: fixed; top: 20px; left: 20px; z-index: 50; }
         .loading { text-align: center; padding: 40px; opacity: 0.6; }
@@ -115,62 +113,50 @@
         }
         .edit-controls { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
 
-        .placeholder-img {
-            width: 100px; height: 100px; border-radius: 50%;
-            background: rgba(255,255,255,0.1); display: flex;
-            align-items: center; justify-content: center;
-            margin: 0 auto 10px; font-size: 40px;
-        }
-        .placeholder-img.large { width: 150px; height: 150px; }
         .empty-state { text-align: center; padding: 40px; opacity: 0.5; }
-        .card-preview-img {
-    width: 100%;
-    aspect-ratio: 16/9;
-    object-fit: cover;
-    border-radius: 12px;
-    margin-bottom: 10px;
-}
-.image-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
-    max-width: 600px;
-    margin: 0 auto 20px;
-}
-.image-gallery img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.15);
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.image-gallery img:hover { transform: scale(1.05); }
-.photos-preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-.photo-edit-item {
-    position: relative;
-    width: 70px; height: 70px;
-}
-.photo-edit-item img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-.photo-remove-btn {
-    position: absolute; top: -6px; right: -6px;
-    background: #ff4d6d; border: none; border-radius: 50%;
-    width: 20px; height: 20px; color: #fff;
-    font-size: 11px; cursor: pointer; line-height: 1;
-    display: flex; align-items: center; justify-content: center;
-}
-.photo-hint { font-size: 12px; opacity: 0.6; margin-bottom: 8px; }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        .image-gallery img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .image-gallery img:hover { transform: scale(1.05); }
+
+        .photos-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .photo-edit-item {
+            position: relative;
+            width: 70px; height: 70px;
+        }
+        .photo-edit-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .photo-remove-btn {
+            position: absolute; top: -6px; right: -6px;
+            background: #ff4d6d; border: none; border-radius: 50%;
+            width: 20px; height: 20px; color: #fff;
+            font-size: 11px; cursor: pointer; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .photo-hint { font-size: 12px; opacity: 0.6; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -179,14 +165,14 @@
 
     <script>
     // ================================================================
-    // КОНФИГУРАЦИЯ — ЗАПОЛНИ ЭТИ ПОЛЯ СВОИМИ ДАННЫМИ
+    // КОНФИГУРАЦИЯ
     // ================================================================
     const CONFIG = {
         owner: 'SphinssaCat',
         repo: 'riap_roleplay',
         branch: 'main',
         dataFile: 'data.json',
-        adminPassword: '1550155Кощь'  // ← смени пароль!
+        adminPassword: '1550155Кощь'
     };
 
     // УТИЛИТЫ
@@ -209,14 +195,28 @@
         } catch (e) {}
         return null;
     }
-        function formatDescription(text) {
-    if (!text) return '<p style="opacity:0.5">Описание не задано.</p>';
-    return text
-        .split(/\r?\n/)
-        .filter(line => line.trim() !== '')
-        .map(line => `<p>${escapeHtml(line)}</p>`)
-        .join('');
-}
+    function formatDescription(text) {
+        if (!text) return '<p style="opacity:0.5">Описание не задано.</p>';
+        return text
+            .split(/\r?\n/)
+            .filter(line => line.trim() !== '')
+            .map(line => `<p>${escapeHtml(line)}</p>`)
+            .join('');
+    }
+    function getPhotos(item) {
+        if (item.photos) return item.photos;
+        if (item.photo) return [item.photo];
+        return [];
+    }
+    function renderGallery(photos) {
+        if (!photos || photos.length === 0) return '';
+        return '<div class="image-gallery">' +
+            photos.map(function(url) {
+                return '<img src="' + escapeHtml(url) + '" alt="Фото" ' +
+                    'onclick="window.open(\'' + escapeHtml(url) + '\',\'_blank\')" ' +
+                    'onerror="this.style.display=\'none\'">';
+            }).join('') + '</div>';
+    }
 
     // GITHUB API
     const GH = {
@@ -226,7 +226,6 @@
         async getData() {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}&t=${Date.now()}`;
             const headers = this.token ? { Authorization: `token ${this.token}` } : {};
-
             const res = await fetch(url, { headers });
             if (res.status === 404) return { participants: [] };
             if (!res.ok) {
@@ -235,37 +234,57 @@
             }
             const json = await res.json();
             const content = decodeURIComponent(escape(atob(json.content)));
-            return JSON.parse(content);
+            const data = JSON.parse(content);
+            // Обратная совместимость: photo -> photos
+            if (data.participants) {
+                for (const p of data.participants) {
+                    if (!p.photos && p.photo) p.photos = [p.photo];
+                    if (!p.photos) p.photos = [];
+                    if (p.characters) {
+                        for (const c of p.characters) {
+                            if (!c.photos && c.photo) c.photos = [c.photo];
+                            if (!c.photos) c.photos = [];
+                        }
+                    }
+                }
+            }
+            return data;
         },
 
         async saveData(data) {
             if (this.saving) throw new Error('Сохранение уже выполняется');
             this.saving = true;
-
             if (!this.token) throw new Error('Не установлен GitHub Token. Войдите как админ.');
-
             const clean = JSON.parse(JSON.stringify(data));
+            // Удаляем старые поля photo, оставляем только photos
+            if (clean.participants) {
+                for (const p of clean.participants) {
+                    delete p.photo;
+                    if (!p.photos) p.photos = [];
+                    if (p.characters) {
+                        for (const c of p.characters) {
+                            delete c.photo;
+                            if (!c.photos) c.photos = [];
+                        }
+                    }
+                }
+            }
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(clean, null, 2))));
-
-            // GET с cache-busting
             const curRes = await fetch(
                 `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}&t=${Date.now()}`,
                 { headers: { Authorization: `token ${this.token}` } }
             );
-
             let sha = null;
             if (curRes.ok) {
                 const cur = await curRes.json();
                 sha = cur.sha;
             }
-
             const body = {
                 message: 'Обновление data.json',
                 content,
                 branch: CONFIG.branch
             };
             if (sha) body.sha = sha;
-
             const res = await fetch(
                 `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`,
                 {
@@ -277,29 +296,35 @@
                     body: JSON.stringify(body)
                 }
             );
-
             this.saving = false;
-
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.message || `Ошибка сохранения (${res.status})`);
             }
-
-            const result = await res.json();
-            this._lastSha = result.content && result.content.sha ? result.content.sha : null;
         },
 
         async uploadImage(file) {
             const ext = file.name.split('.').pop().toLowerCase();
+            if (!['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                throw new Error('Неподдерживаемый формат файла');
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                throw new Error('Файл слишком большой (максимум 5 МБ)');
+            }
             const filename = `uploads/img-${uuid()}.${ext}`;
-
             const base64 = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onload = () => {
+                    const parts = reader.result.split(',');
+                    if (parts.length !== 2) {
+                        reject(new Error('Некорректный формат данных файла'));
+                        return;
+                    }
+                    resolve(parts[1]);
+                };
                 reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
-
             const res = await fetch(
                 `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${filename}`,
                 {
@@ -315,7 +340,6 @@
                     })
                 }
             );
-
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error('Не удалось загрузить изображение: ' + (err.message || res.status));
@@ -331,7 +355,6 @@
             );
             if (!res.ok) return;
             const json = await res.json();
-
             await fetch(
                 `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`,
                 {
@@ -357,13 +380,64 @@
         loading: true
     };
 
-    // КНОПКА АДМИНА (всегда в правом верхнем углу)
+    // Фоторедактор (глобальные переменные для форм)
+    let editingPhotos = [];
+    let removedPhotos = [];
+
+    function initPhotoEditor(existingPhotos) {
+        editingPhotos = (existingPhotos || []).slice();
+        removedPhotos = [];
+    }
+    function renderPhotoEditor(containerId) {
+        const c = document.getElementById(containerId);
+        if (!c) return;
+        if (editingPhotos.length === 0) {
+            c.innerHTML = '<p class="photo-hint">Изображений пока нет</p>';
+            return;
+        }
+        c.innerHTML = editingPhotos.map(function(url, i) {
+            return '<div class="photo-edit-item">' +
+                '<img src="' + escapeHtml(url) + '" alt="" onerror="this.style.opacity=0.3">' +
+                '<button type="button" class="photo-remove-btn" onclick="removePhotoAt(' + i + ')">&#10005;</button>' +
+                '</div>';
+        }).join('');
+    }
+    function removePhotoAt(index) {
+        const removed = editingPhotos.splice(index, 1)[0];
+        if (removed) removedPhotos.push(removed);
+        renderPhotoEditor('photos-preview');
+    }
+    async function addPhotosFromInput(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input || !input.files.length) return;
+        const remaining = 6 - editingPhotos.length;
+        if (remaining <= 0) { alert('Максимум 6 изображений'); input.value = ''; return; }
+        const files = Array.from(input.files).slice(0, remaining);
+        showLoading('Загрузка изображений...');
+        for (const file of files) {
+            try {
+                const url = await GH.uploadImage(file);
+                editingPhotos.push(url);
+            } catch (e) { alert('Ошибка: ' + e.message); }
+        }
+        closeLoading();
+        input.value = '';
+        renderPhotoEditor('photos-preview');
+    }
+    async function cleanupRemovedPhotos() {
+        for (const url of removedPhotos) {
+            try { await GH.deleteFile(extractPath(url)); } catch (e) {}
+        }
+        removedPhotos = [];
+    }
+
+    // КНОПКА АДМИНА
     function renderAdminBtn() {
         const container = document.getElementById('admin-btn-container');
         if (state.isAdmin) {
-            container.innerHTML = `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
+            container.innerHTML = '<div class="admin-badge">&#128081; Админ <button onclick="logout()">Выйти</button></div>';
         } else {
-            container.innerHTML = `<div class="admin-badge"><button onclick="loginAdmin()">Войти</button></div>`;
+            container.innerHTML = '<div class="admin-badge"><button onclick="loginAdmin()">Войти</button></div>';
         }
     }
 
@@ -372,7 +446,6 @@
         const password = prompt('Введите пароль для редактирования:');
         if (password === null) return false;
         if (password !== CONFIG.adminPassword) { alert('Неверный пароль'); return false; }
-
         let token = localStorage.getItem('gh_token');
         if (!token) {
             token = prompt('Введите ваш GitHub Personal Access Token\n(нужны права repo):');
@@ -387,7 +460,7 @@
         return true;
     }
 
-            // АДМИН: ВЫХОД
+    // АДМИН: ВЫХОД
     function logout() {
         state.isAdmin = false;
         localStorage.removeItem('isAdmin');
@@ -397,7 +470,6 @@
         route();
     }
 
-    // Проверка доступа при попытке редактировать
     async function checkAdminAccess() {
         if (state.isAdmin) return true;
         return await loginAdmin();
@@ -441,119 +513,118 @@
         const app = document.getElementById('app');
         try {
             if (!state.data) state.data = await GH.getData();
-        } catch (e) { app.innerHTML = `<div class="error-msg">Ошибка: ${e.message}</div>`; return; }
+        } catch (e) { app.innerHTML = '<div class="error-msg">Ошибка: ' + escapeHtml(e.message) + '</div>'; return; }
 
         const participants = state.data.participants || [];
-        let html = `<h1>Участники</h1>`;
+        let html = '<h1>Участники</h1>';
 
         if (participants.length === 0) {
-            html += `<div class="empty-state">Пока нет ни одного участника</div>`;
+            html += '<div class="empty-state">Пока нет ни одного участника</div>';
         } else {
-            html += `<div class="cards-grid">`;
+            html += '<div class="cards-grid">';
             for (const p of participants) {
-                const photo = p.photo
-                    ? `<img src="${p.photo}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img" style="display:none">👤</div>`
-                    : `<div class="placeholder-img">👤</div>`;
+                const photos = getPhotos(p);
+                const preview = photos.length > 0
+                    ? '<img class="card-preview-img" src="' + escapeHtml(photos[0]) + '" alt="' + escapeHtml(p.name) + '" onerror="this.style.display=\'none\'">'
+                    : '';
                 const desc = (p.description || '').slice(0, 80);
-                html += `<div class="card" onclick="location.hash = '/participant/${p.id}'">
-                    ${photo}<h3>${escapeHtml(p.name)}</h3>
-                    <p>${escapeHtml(desc)}${p.description && p.description.length > 80 ? '…' : ''}</p>
-                    ${state.isAdmin ? `<div class="edit-controls" onclick="event.stopPropagation()">
-                        <button class="btn btn-small" onclick="editParticipant('${p.id}')">✎ Изменить</button>
-                        <button class="btn btn-small btn-danger" onclick="deleteParticipant('${p.id}')">🗑 Удалить</button>
-                    </div>` : ''}
-                </div>`;
+                html += '<div class="card" onclick="location.hash = \'/participant/' + p.id + '\'">' +
+                    preview +
+                    '<h3>' + escapeHtml(p.name) + '</h3>' +
+                    '<p>' + escapeHtml(desc) + (p.description && p.description.length > 80 ? '\u2026' : '') + '</p>' +
+                    (state.isAdmin ? '<div class="edit-controls" onclick="event.stopPropagation()">' +
+                        '<button class="btn btn-small" onclick="editParticipant(\'' + p.id + '\')">&#9998; Изменить</button>' +
+                        '<button class="btn btn-small btn-danger" onclick="deleteParticipant(\'' + p.id + '\')">&#128465; Удалить</button>' +
+                    '</div>' : '') +
+                '</div>';
             }
-            html += `</div>`;
+            html += '</div>';
         }
-        html += `<div class="action-row">`;
-        html += `<button class="btn" onclick="addParticipant()">+ Добавить участника</button>`;
-        if (state.isAdmin) html += `<button class="btn" style="background:linear-gradient(135deg,#2d6a4f,#52b78a)" onclick="manualSave()">💾 Сохранить</button>`;
-        html += `</div>`;
+        html += '<div class="action-row">';
+        html += '<button class="btn" onclick="addParticipant()">+ Добавить участника</button>';
+        if (state.isAdmin) html += '<button class="btn" style="background:linear-gradient(135deg,#2d6a4f,#52b78a)" onclick="manualSave()">\uD83D\uDCBE Сохранить</button>';
+        html += '</div>';
         app.innerHTML = html;
     }
 
     // РЕНДЕР: СТРАНИЦА УЧАСТНИКА
-async function renderParticipant(id) {
-    const app = document.getElementById('app');
-    if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
-    const participant = (state.data.participants || []).find(p => p.id === id);
-    if (!participant) { app.innerHTML = `<div class="error-msg">Участник не найден</div><button class="btn" onclick="location.hash='/'">На главную</button>`; return; }
+    async function renderParticipant(id) {
+        const app = document.getElementById('app');
+        if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = '<div class="error-msg">' + escapeHtml(e.message) + '</div>'; return; } }
+        const participant = (state.data.participants || []).find(p => p.id === id);
+        if (!participant) { app.innerHTML = '<div class="error-msg">Участник не найден</div><button class="btn" onclick="location.hash=\'/\'">На главную</button>'; return; }
 
-    const photo = participant.photo
-        ? `<img src="${participant.photo}" alt="${escapeHtml(participant.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">👤</div>`
-        : `<div class="placeholder-img large">👤</div>`;
+        const photos = getPhotos(participant);
+        let html = '<button class="btn btn-small back-btn" onclick="location.hash=\'/\'">\u2190 Назад</button>';
+        html += '<div class="participant-header">' +
+            renderGallery(photos) +
+            '<h2>' + escapeHtml(participant.name) + '</h2>' +
+            '<div class="description-block">' + formatDescription(participant.description) + '</div>' +
+            (state.isAdmin ? '<div class="edit-controls">' +
+                '<button class="btn btn-small" onclick="editParticipant(\'' + participant.id + '\')">&#9998; Изменить</button>' +
+                '<button class="btn btn-small btn-danger" onclick="deleteParticipant(\'' + participant.id + '\')">&#128465; Удалить</button>' +
+            '</div>' : '') +
+        '</div>';
 
-    let html = `<button class="btn btn-small back-btn" onclick="location.hash='/'">← Назад</button>`;
-
-    html += `<div class="participant-header">${photo}
-        <h2>${escapeHtml(participant.name)}</h2>
-        <div class="description-block">${formatDescription(participant.description)}</div>
-        ${state.isAdmin ? `<div class="edit-controls">
-            <button class="btn btn-small" onclick="editParticipant('${participant.id}')">✎ Изменить</button>
-            <button class="btn btn-small btn-danger" onclick="deleteParticipant('${participant.id}')">🗑 Удалить</button>
-        </div>` : ''}
-    </div>`;
-
-    const characters = participant.characters || [];
-    if (characters.length === 0) {
-        html += `<div class="empty-state">У этого участника пока нет персонажей</div>`;
-    } else {
-        html += `<div class="cards-grid">`;
-        for (const c of characters) {
-            const cPhoto = c.photo
-                ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img" style="display:none">🎭</div>`
-                : `<div class="placeholder-img">🎭</div>`;
-            const cDesc = (c.description || '').slice(0, 80);
-            html += `<div class="card" onclick="location.hash = '/participant/${participant.id}/character/${c.id}'">
-                ${cPhoto}<h3>${escapeHtml(c.name)}</h3>
-                <p>${escapeHtml(cDesc)}${c.description && c.description.length > 80 ? '…' : ''}</p>
-                ${state.isAdmin ? `<div class="edit-controls" onclick="event.stopPropagation()">
-                    <button class="btn btn-small" onclick="editCharacter('${participant.id}','${c.id}')">✎ Изменить</button>
-                    <button class="btn btn-small btn-danger" onclick="deleteCharacter('${participant.id}','${c.id}')">🗑 Удалить</button>
-                </div>` : ''}
-            </div>`;
+        const characters = participant.characters || [];
+        if (characters.length === 0) {
+            html += '<div class="empty-state">У этого участника пока нет персонажей</div>';
+        } else {
+            html += '<div class="cards-grid">';
+            for (const c of characters) {
+                const cPhotos = getPhotos(c);
+                const cPreview = cPhotos.length > 0
+                    ? '<img class="card-preview-img" src="' + escapeHtml(cPhotos[0]) + '" alt="' + escapeHtml(c.name) + '" onerror="this.style.display=\'none\'">'
+                    : '';
+                const cDesc = (c.description || '').slice(0, 80);
+                html += '<div class="card" onclick="location.hash = \'/participant/' + participant.id + '/character/' + c.id + '\'">' +
+                    cPreview +
+                    '<h3>' + escapeHtml(c.name) + '</h3>' +
+                    '<p>' + escapeHtml(cDesc) + (c.description && c.description.length > 80 ? '\u2026' : '') + '</p>' +
+                    (state.isAdmin ? '<div class="edit-controls" onclick="event.stopPropagation()">' +
+                        '<button class="btn btn-small" onclick="editCharacter(\'' + participant.id + '\',\'' + c.id + '\')">&#9998; Изменить</button>' +
+                        '<button class="btn btn-small btn-danger" onclick="deleteCharacter(\'' + participant.id + '\',\'' + c.id + '\')">&#128465; Удалить</button>' +
+                    '</div>' : '') +
+                '</div>';
+            }
+            html += '</div>';
         }
-        html += `</div>`;
+        html += '<div class="action-row">';
+        html += '<button class="btn" onclick="addCharacter(\'' + participant.id + '\')">+ Добавить персонажа</button>';
+        if (state.isAdmin) html += '<button class="btn" style="background:linear-gradient(135deg,#2d6a4f,#52b78a)" onclick="manualSave()">\uD83D\uDCBE Сохранить</button>';
+        html += '</div>';
+        app.innerHTML = html;
     }
-    html += `<div class="action-row">`;
-    html += `<button class="btn" onclick="addCharacter('${participant.id}')">+ Добавить персонажа</button>`;
-    if (state.isAdmin) html += `<button class="btn" style="background:linear-gradient(135deg,#2d6a4f,#52b78a)" onclick="manualSave()">💾 Сохранить</button>`;
-    html += `</div>`;
-    app.innerHTML = html;
-}
 
     // РЕНДЕР: СТРАНИЦА ПЕРСОНАЖА
-async function renderCharacter(pid, cid) {
-    const app = document.getElementById('app');
-    if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
-    const p = (state.data.participants || []).find(x => x.id === pid);
-    if (!p) { app.innerHTML = `<div class="error-msg">Участник не найден</div>`; return; }
-    const c = (p.characters || []).find(x => x.id === cid);
-    if (!c) { app.innerHTML = `<div class="error-msg">Персонаж не найден</div>`; return; }
+    async function renderCharacter(pid, cid) {
+        const app = document.getElementById('app');
+        if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = '<div class="error-msg">' + escapeHtml(e.message) + '</div>'; return; } }
+        const p = (state.data.participants || []).find(x => x.id === pid);
+        if (!p) { app.innerHTML = '<div class="error-msg">Участник не найден</div>'; return; }
+        const c = (p.characters || []).find(x => x.id === cid);
+        if (!c) { app.innerHTML = '<div class="error-msg">Персонаж не найден</div>'; return; }
 
-    const photo = c.photo
-        ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">🎭</div>`
-        : `<div class="placeholder-img large">🎭</div>`;
-
-    let html = `<button class="btn btn-small back-btn" onclick="location.hash='/participant/${pid}'">← Назад</button>`;
-    html += `<div class="participant-header">${photo}
-        <h2>${escapeHtml(c.name)}</h2>
-        <div class="description-block">${formatDescription(c.description)}</div>
-        <p style="margin-top:10px;opacity:0.5;font-size:14px">Участник: ${escapeHtml(p.name)}</p>
-        ${state.isAdmin ? `<div class="edit-controls">
-            <button class="btn btn-small" onclick="editCharacter('${pid}','${cid}')">✎ Изменить</button>
-            <button class="btn btn-small btn-danger" onclick="deleteCharacter('${pid}','${cid}')">🗑 Удалить</button>
-        </div>` : ''}
-    </div>`;
-    app.innerHTML = html;
-}
+        const photos = getPhotos(c);
+        let html = '<button class="btn btn-small back-btn" onclick="location.hash=\'/participant/' + pid + '\'">\u2190 Назад</button>';
+        html += '<div class="participant-header">' +
+            renderGallery(photos) +
+            '<h2>' + escapeHtml(c.name) + '</h2>' +
+            '<div class="description-block">' + formatDescription(c.description) + '</div>' +
+            '<p style="margin-top:10px;opacity:0.5;font-size:14px">Участник: ' + escapeHtml(p.name) + '</p>' +
+            (state.isAdmin ? '<div class="edit-controls">' +
+                '<button class="btn btn-small" onclick="editCharacter(\'' + pid + '\',\'' + cid + '\')">&#9998; Изменить</button>' +
+                '<button class="btn btn-small btn-danger" onclick="deleteCharacter(\'' + pid + '\',\'' + cid + '\')">&#128465; Удалить</button>' +
+            '</div>' : '') +
+        '</div>';
+        app.innerHTML = html;
+    }
 
     // ФОРМЫ
     function showForm(html) {
         const old = document.getElementById('form-overlay'); if (old) old.remove();
         const o = document.createElement('div'); o.className = 'form-overlay'; o.id = 'form-overlay';
-        o.innerHTML = `<div class="form-box">${html}</div>`;
+        o.innerHTML = '<div class="form-box">' + html + '</div>';
         document.body.appendChild(o);
         o.addEventListener('click', e => { if (e.target === o) o.remove(); });
     }
@@ -561,48 +632,51 @@ async function renderCharacter(pid, cid) {
     function showLoading(text) {
         const old = document.getElementById('loading-overlay'); if (old) old.remove();
         const d = document.createElement('div'); d.className = 'form-overlay'; d.id = 'loading-overlay';
-        d.innerHTML = `<div class="form-box"><p style="text-align:center">${text || 'Загрузка...'}</p></div>`;
+        d.innerHTML = '<div class="form-box"><p style="text-align:center">' + (text || 'Загрузка...') + '</p></div>';
         document.body.appendChild(d);
     }
     function closeLoading() { const o = document.getElementById('loading-overlay'); if (o) o.remove(); }
-    async function handleImageUpload(id) {
-        const input = document.getElementById(id);
-        if (!input || !input.files[0]) return null;
-        return await GH.uploadImage(input.files[0]);
-    }
 
     // УЧАСТНИКИ: добавить / изменить / удалить
     async function addParticipant() {
         if (!(await checkAdminAccess())) return;
-        showForm(`<h2>Новый участник</h2>
-            <label>Имя *</label><input type="text" id="p-name" placeholder="Имя участника">
-            <label>Описание</label><textarea id="p-desc" placeholder="Краткое описание"></textarea>
-            <label>Фото</label><input type="file" id="p-photo" accept="image/*">
-            <div class="form-row"><button class="btn" onclick="saveNewParticipant()">Сохранить</button>
-            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+        initPhotoEditor([]);
+        showForm('<h2>Новый участник</h2>' +
+            '<label>Имя *</label><input type="text" id="p-name" placeholder="Имя участника">' +
+            '<label>Описание</label><textarea id="p-desc" placeholder="Краткое описание"></textarea>' +
+            '<label>Изображения (до 6 шт.)</label>' +
+            '<input type="file" id="p-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'p-photos\')">' +
+            '<div class="photos-preview" id="photos-preview"></div>' +
+            '<div class="form-row"><button class="btn" onclick="saveNewParticipant()">Сохранить</button>' +
+            '<button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>');
+        renderPhotoEditor('photos-preview');
     }
     async function saveNewParticipant() {
         const name = document.getElementById('p-name').value.trim();
         if (!name) { alert('Введите имя'); return; }
         const desc = document.getElementById('p-desc').value.trim();
         closeForm(); showLoading('Сохранение...');
-        let photo = null;
-        try { photo = await handleImageUpload('p-photo'); } catch (e) { alert('Фото: ' + e.message); }
         if (!state.data.participants) state.data.participants = [];
-        state.data.participants.push({ id: uuid(), name, description: desc, photo, characters: [] });
+        state.data.participants.push({
+            id: uuid(), name, description: desc,
+            photos: editingPhotos.slice(), characters: []
+        });
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
         closeLoading(); renderMain();
     }
     async function editParticipant(id) {
         if (!(await checkAdminAccess())) return;
         const p = state.data.participants.find(x => x.id === id); if (!p) return;
-        showForm(`<h2>Редактировать участника</h2>
-            <label>Имя *</label><input type="text" id="p-name" value="${escapeHtml(p.name)}">
-            <label>Описание</label><textarea id="p-desc">${escapeHtml(p.description || '')}</textarea>
-            <label>Новое фото (пусто = без изменений)</label><input type="file" id="p-photo" accept="image/*">
-            ${p.photo ? `<p style="opacity:0.6;font-size:13px;margin-bottom:10px">Текущее: <a href="${p.photo}" target="_blank" style="color:#9381ff">открыть</a></p>` : ''}
-            <div class="form-row"><button class="btn" onclick="saveEditParticipant('${id}')">Сохранить</button>
-            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+        initPhotoEditor(getPhotos(p));
+        showForm('<h2>Редактировать участника</h2>' +
+            '<label>Имя *</label><input type="text" id="p-name" value="' + escapeHtml(p.name) + '">' +
+            '<label>Описание</label><textarea id="p-desc">' + escapeHtml(p.description || '') + '</textarea>' +
+            '<label>Изображения (до 6 шт.)</label>' +
+            '<input type="file" id="p-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'p-photos\')">' +
+            '<div class="photos-preview" id="photos-preview"></div>' +
+            '<div class="form-row"><button class="btn" onclick="saveEditParticipant(\'' + id + '\')">Сохранить</button>' +
+            '<button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>');
+        renderPhotoEditor('photos-preview');
     }
     async function saveEditParticipant(id) {
         const name = document.getElementById('p-name').value.trim();
@@ -611,8 +685,8 @@ async function renderCharacter(pid, cid) {
         closeForm(); showLoading('Сохранение...');
         const p = state.data.participants.find(x => x.id === id); if (!p) { closeLoading(); return; }
         p.name = name; p.description = desc;
-        const fi = document.getElementById('p-photo');
-        if (fi && fi.files[0]) { try { if (p.photo) await GH.deleteFile(extractPath(p.photo)); p.photo = await GH.uploadImage(fi.files[0]); } catch (e) { alert('Фото: ' + e.message); } }
+        p.photos = editingPhotos.slice();
+        await cleanupRemovedPhotos();
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
         closeLoading(); route();
     }
@@ -622,8 +696,12 @@ async function renderCharacter(pid, cid) {
         showLoading('Удаление...');
         const p = state.data.participants.find(x => x.id === id);
         if (p) {
-            if (p.photo) { try { await GH.deleteFile(extractPath(p.photo)); } catch(e) {} }
-            if (p.characters) for (const c of p.characters) if (c.photo) { try { await GH.deleteFile(extractPath(c.photo)); } catch(e) {} }
+            const photos = getPhotos(p);
+            for (const url of photos) { try { await GH.deleteFile(extractPath(url)); } catch(e) {} }
+            if (p.characters) for (const c of p.characters) {
+                const cPhotos = getPhotos(c);
+                for (const url of cPhotos) { try { await GH.deleteFile(extractPath(url)); } catch(e) {} }
+            }
         }
         state.data.participants = state.data.participants.filter(x => x.id !== id);
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
@@ -633,23 +711,28 @@ async function renderCharacter(pid, cid) {
     // ПЕРСОНАЖИ: добавить / изменить / удалить
     async function addCharacter(pid) {
         if (!(await checkAdminAccess())) return;
-        showForm(`<h2>Новый персонаж</h2>
-            <label>Имя *</label><input type="text" id="c-name" placeholder="Имя персонажа">
-            <label>Описание</label><textarea id="c-desc" placeholder="Краткое описание"></textarea>
-            <label>Фото</label><input type="file" id="c-photo" accept="image/*">
-            <div class="form-row"><button class="btn" onclick="saveNewCharacter('${pid}')">Сохранить</button>
-            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+        initPhotoEditor([]);
+        showForm('<h2>Новый персонаж</h2>' +
+            '<label>Имя *</label><input type="text" id="c-name" placeholder="Имя персонажа">' +
+            '<label>Описание</label><textarea id="c-desc" placeholder="Краткое описание"></textarea>' +
+            '<label>Изображения (до 6 шт.)</label>' +
+            '<input type="file" id="c-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'c-photos\')">' +
+            '<div class="photos-preview" id="photos-preview"></div>' +
+            '<div class="form-row"><button class="btn" onclick="saveNewCharacter(\'' + pid + '\')">Сохранить</button>' +
+            '<button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>');
+        renderPhotoEditor('photos-preview');
     }
     async function saveNewCharacter(pid) {
         const name = document.getElementById('c-name').value.trim();
         if (!name) { alert('Введите имя'); return; }
         const desc = document.getElementById('c-desc').value.trim();
         closeForm(); showLoading('Сохранение...');
-        let photo = null;
-        try { photo = await handleImageUpload('c-photo'); } catch (e) { alert('Фото: ' + e.message); }
         const p = state.data.participants.find(x => x.id === pid);
         if (!p.characters) p.characters = [];
-        p.characters.push({ id: uuid(), name, description: desc, photo });
+        p.characters.push({
+            id: uuid(), name, description: desc,
+            photos: editingPhotos.slice()
+        });
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
         closeLoading(); renderParticipant(pid);
     }
@@ -657,13 +740,16 @@ async function renderCharacter(pid, cid) {
         if (!(await checkAdminAccess())) return;
         const p = state.data.participants.find(x => x.id === pid); if (!p) return;
         const c = (p.characters || []).find(x => x.id === cid); if (!c) return;
-        showForm(`<h2>Редактировать персонажа</h2>
-            <label>Имя *</label><input type="text" id="c-name" value="${escapeHtml(c.name)}">
-            <label>Описание</label><textarea id="c-desc">${escapeHtml(c.description || '')}</textarea>
-            <label>Новое фото (пусто = без изменений)</label><input type="file" id="c-photo" accept="image/*">
-            ${c.photo ? `<p style="opacity:0.6;font-size:13px;margin-bottom:10px">Текущее: <a href="${c.photo}" target="_blank" style="color:#9381ff">открыть</a></p>` : ''}
-            <div class="form-row"><button class="btn" onclick="saveEditCharacter('${pid}','${cid}')">Сохранить</button>
-            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+        initPhotoEditor(getPhotos(c));
+        showForm('<h2>Редактировать персонажа</h2>' +
+            '<label>Имя *</label><input type="text" id="c-name" value="' + escapeHtml(c.name) + '">' +
+            '<label>Описание</label><textarea id="c-desc">' + escapeHtml(c.description || '') + '</textarea>' +
+            '<label>Изображения (до 6 шт.)</label>' +
+            '<input type="file" id="c-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'c-photos\')">' +
+            '<div class="photos-preview" id="photos-preview"></div>' +
+            '<div class="form-row"><button class="btn" onclick="saveEditCharacter(\'' + pid + '\',\'' + cid + '\')">Сохранить</button>' +
+            '<button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>');
+        renderPhotoEditor('photos-preview');
     }
     async function saveEditCharacter(pid, cid) {
         const name = document.getElementById('c-name').value.trim();
@@ -673,8 +759,8 @@ async function renderCharacter(pid, cid) {
         const p = state.data.participants.find(x => x.id === pid); if (!p) { closeLoading(); return; }
         const c = (p.characters || []).find(x => x.id === cid); if (!c) { closeLoading(); return; }
         c.name = name; c.description = desc;
-        const fi = document.getElementById('c-photo');
-        if (fi && fi.files[0]) { try { if (c.photo) await GH.deleteFile(extractPath(c.photo)); c.photo = await GH.uploadImage(fi.files[0]); } catch (e) { alert('Фото: ' + e.message); } }
+        c.photos = editingPhotos.slice();
+        await cleanupRemovedPhotos();
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
         closeLoading(); route();
     }
@@ -685,7 +771,10 @@ async function renderCharacter(pid, cid) {
         const p = state.data.participants.find(x => x.id === pid);
         if (p && p.characters) {
             const c = p.characters.find(x => x.id === cid);
-            if (c && c.photo) { try { await GH.deleteFile(extractPath(c.photo)); } catch(e) {} }
+            if (c) {
+                const cPhotos = getPhotos(c);
+                for (const url of cPhotos) { try { await GH.deleteFile(extractPath(url)); } catch(e) {} }
+            }
             p.characters = p.characters.filter(x => x.id !== cid);
         }
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
