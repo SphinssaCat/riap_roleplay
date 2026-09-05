@@ -5,14 +5,7 @@
       "name": "Генри",
       "description": "Возможно будет",
       "photo": null,
-      "characters": [
-        {
-          "id": "mtnw65rtzhfqe",
-          "name": "Геката",
-          "description": "...",
-          "photo": null
-        }
-      ]
+      "characters": []
     },
     {
       "id": "mtnvyx8qlloqn",
