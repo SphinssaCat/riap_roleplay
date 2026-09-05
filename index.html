@@ -123,6 +123,54 @@
         }
         .placeholder-img.large { width: 150px; height: 150px; }
         .empty-state { text-align: center; padding: 40px; opacity: 0.5; }
+        .card-preview-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    max-width: 600px;
+    margin: 0 auto 20px;
+}
+.image-gallery img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.image-gallery img:hover { transform: scale(1.05); }
+.photos-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.photo-edit-item {
+    position: relative;
+    width: 70px; height: 70px;
+}
+.photo-edit-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.photo-remove-btn {
+    position: absolute; top: -6px; right: -6px;
+    background: #ff4d6d; border: none; border-radius: 50%;
+    width: 20px; height: 20px; color: #fff;
+    font-size: 11px; cursor: pointer; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+}
+.photo-hint { font-size: 12px; opacity: 0.6; margin-bottom: 8px; }
     </style>
 </head>
 <body>
