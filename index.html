@@ -3,373 +3,543 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Персонажи — Главная</title>
+    <title>Участники и персонажи</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            background: #1a1a2e;
-            color: #e0e0e0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #533483);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             min-height: 100vh;
+            color: #fff;
         }
-
-        header {
-            background: #16213e;
-            padding: 30px 20px;
-            text-align: center;
-            border-bottom: 3px solid #0f3460;
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
+        #app { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; margin: 30px 0; font-size: 2em; }
 
-        header h1 {
-            color: #e94560;
-            font-size: 2.2em;
-            margin-bottom: 5px;
-        }
-
-        main {
-            max-width: 700px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        h2 {
-            color: #e94560;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-
-        .list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .list li {
-            margin: 10px 0;
-        }
-
-        .list a {
-            display: block;
-            padding: 18px 24px;
-            background: #16213e;
-            color: #e0e0e0;
-            text-decoration: none;
-            border-radius: 10px;
-            border-left: 4px solid #0f3460;
-            font-size: 1.1em;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .list a:hover {
-            background: #0f3460;
-            border-left-color: #e94560;
-            transform: translateX(6px);
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #a8b8d8;
-            text-decoration: none;
-            font-size: 1em;
-            cursor: pointer;
-        }
-
-        .back-link:hover {
-            color: #e94560;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .character-info {
-            background: #16213e;
-            border-radius: 10px;
-            padding: 30px;
-            border-left: 4px solid #0f3460;
-        }
-
-        .character-info p {
-            margin: 10px 0;
-            line-height: 1.6;
-            font-size: 1.1em;
-        }
-
-        .owner-link {
-            color: #e94560;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .owner-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Аватарка участника */
-        .participant-avatar {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 4px solid #0f3460;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            display: block;
-            margin: 0 auto 20px auto;
-        }
-
-        /* Карточка персонажа */
-        .character-card {
-            display: flex;
-            align-items: flex-start;
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            background: #16213e;
-            padding: 20px;
-            border-radius: 14px;
-            border-left: 4px solid #0f3460;
+            margin-bottom: 30px;
         }
-
-        .character-card img {
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            text-align: center;
+        }
+        .card:hover {
+            transform: scale(1.03);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .card img {
             width: 100px;
             height: 100px;
-            min-width: 100px;
+            border-radius: 50%;
             object-fit: cover;
-            border-radius: 12px;
-            border: 2px solid #e94560;
+            margin-bottom: 10px;
         }
+        .card h3 { margin-bottom: 8px; }
+        .card p { font-size: 0.85em; opacity: 0.8; }
 
-        .character-info-text {
-            flex: 1;
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6a4c93, #9381ff);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(147, 129, 255, 0.4);
+            display: block;
+            margin: 20px auto;
         }
+        .btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 8px 25px rgba(147, 129, 255, 0.6);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-danger { background: linear-gradient(135deg, #c9184a, #ff4d6d); }
+        .btn-small { padding: 6px 14px; font-size: 13px; display: inline-block; margin: 0; }
+
+        .form-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .form-box {
+            background: #1a1a2e;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .form-box h2 { margin-bottom: 20px; }
+        .form-box input, .form-box textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 15px;
+            font-family: inherit;
+        }
+        .form-box textarea { min-height: 100px; resize: vertical; }
+        .form-box label { display: block; margin-bottom: 5px; opacity: 0.8; font-size: 14px; }
+        .form-box input[type="file"] { padding: 5px; }
+        .form-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+        .form-row .btn { margin: 0; }
+
+        .participant-header { text-align: center; margin-bottom: 30px; }
+        .participant-header img {
+            width: 150px; height: 150px;
+            border-radius: 50%; object-fit: cover; margin-bottom: 15px;
+        }
+        .participant-header h2 { margin-bottom: 10px; }
+        .participant-header p { opacity: 0.8; max-width: 600px; margin: 0 auto; }
+
+        .back-btn { position: fixed; top: 20px; left: 20px; z-index: 50; }
+        .loading { text-align: center; padding: 40px; opacity: 0.6; }
+        .error-msg { color: #ff4d6d; text-align: center; padding: 20px; }
+
+        .admin-badge {
+            position: fixed; top: 20px; right: 20px;
+            background: rgba(147, 129, 255, 0.3);
+            border: 1px solid rgba(147, 129, 255, 0.5);
+            border-radius: 20px; padding: 6px 16px; font-size: 13px;
+        }
+        .admin-badge button {
+            background: none; border: none; color: #fff; cursor: pointer;
+            font-size: 12px; text-decoration: underline; opacity: 0.7;
+        }
+        .edit-controls { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+
+        .placeholder-img {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px; font-size: 40px;
+        }
+        .placeholder-img.large { width: 150px; height: 150px; }
+        .empty-state { text-align: center; padding: 40px; opacity: 0.5; }
     </style>
 </head>
 <body>
+    <div id="app"></div>
 
-<header>
-    <h1 id="page-title">Главная</h1>
-</header>
-
-<main>
-    <!-- ГЛАВНАЯ СТРАНИЦА (список участников) -->
-    <div id="main-view">
-        <h2>Участники</h2>
-        <ul class="list" id="participants-list"></ul>
-    </div>
-
-    <!-- СТРАНИЦА УЧАСТНИКА (список его персонажей) -->
-    <div id="participant-view" class="hidden">
-        <span class="back-link" onclick="showMain()">← На главную</span>
-        <div style="text-align: center; margin-bottom: 30px;">
-            <img id="participant-avatar" src="" alt="" class="participant-avatar" style="display: none;">
-            <h2 id="participant-name"></h2>
-        </div>
-        <ul class="list" id="characters-list"></ul>
-    </div>
-
-    <!-- СТРАНИЦА ПЕРСОНАЖА -->
-    <div id="character-view" class="hidden">
-        <span class="back-link" onclick="showParticipant(currentParticipant)">← Назад</span>
-        <div class="character-card">
-            <img id="character-avatar" src="" alt="" style="display: none;">
-            <div class="character-info-text">
-                <h2 id="character-name"></h2>
-                <div class="character-info" id="character-content"></div>
-            </div>
-        </div>
-    </div>
-</main>
-
-<script>
-    // ===================================================
-    // ДАННЫЕ — весь список участников и их персонажей.
-    // Чтобы добавить участника — допишите новый объект в массив.
-    // Чтобы добавить персонажа — впишите его в массив characters.
-    // avatar — имя файла картинки в папке images/ (пустая строка = нет картинки).
-    // desc — описание персонажа (можно использовать HTML-теги: <b>, <br>, <i> и т.д.)
-    // ===================================================
-    const data = [
-        {
-            name: "Генри",
-            avatar: "",
-            characters: [
-                { name: "Геката", desc: "." }
-            ]
-        },
-        {
-            name: "Яра",
-            avatar: "",
-            characters: [
-                { name: "Элнир", desc: "." },
-                { name: "Первый", desc: "." }
-            ]
-        },
-        {
-            name: "Сфинкс",
-            avatar: "",
-            characters: [
-                { name: "Фео", desc: "." },
-                { name: "Обскури", desc: "." },
-                { name: "Кира", desc: "." },
-                { name: "Азури", desc: "." }
-            ]
-        },
-        {
-            name: "Витёк",
-            avatar: "",
-            characters: [
-                { name: "Марк", desc: "." },
-                { name: "Мия", desc: "." },
-                { name: "Кейн", desc: "." }
-            ]
-        },
-        {
-            name: "Репейник",
-            avatar: "",
-            characters: [
-                { name: "Даала", desc: "." },
-                { name: "Кай", desc: "." }
-            ]
-        },
-        {
-            name: "Марти",
-            avatar: "",
-            characters: [
-                { name: "Сорок Пять", desc: "." }
-            ]
-        },
-        {
-            name: "Акарумей Окото",
-            avatar: "",
-            characters: [
-                { name: "Акарумей Окото", desc: "." }
-            ]
-        },
-        {
-            name: "Ясик",
-            avatar: "",
-            characters: [
-                { name: "Яс", desc: "." }
-            ]
-        },
-        {
-            name: "Лиза",
-            avatar: "",
-            characters: [
-                { name: "Роберт", desc: "." }
-            ]
-        }
-    ];
-
-    // Текущий участник (нужен для возврата со страницы персонажа)
-    let currentParticipant = 0;
-
-    // ОТОБРАЖЕНИЕ ГЛАВНОЙ СТРАНИЦЫ
-    function showMain() {
-        document.getElementById('page-title').textContent = 'Главная';
-        document.getElementById('main-view').classList.remove('hidden');
-        document.getElementById('participant-view').classList.add('hidden');
-        document.getElementById('character-view').classList.add('hidden');
-    }
-
-    // ОТОБРАЖЕНИЕ СТРАНИЦЫ УЧАСТНИКА
-    function showParticipant(index) {
-        // Если вызвано без аргумента (например, при загрузке) — ничего не делаем
-        if (index === undefined) return;
-
-        currentParticipant = index;
-        const participant = data[index];
-
-        document.getElementById('page-title').textContent = participant.name;
-        document.getElementById('participant-name').textContent =
-            'Персонажи — ' + participant.name;
-
-        // Аватарка участника
-        const avatarEl = document.getElementById('participant-avatar');
-        if (participant.avatar) {
-            avatarEl.src = 'images/' + participant.avatar;
-            avatarEl.style.display = 'block';
-        } else {
-            avatarEl.style.display = 'none';
-        }
-
-        // Список персонажей
-        const list = document.getElementById('characters-list');
-        list.innerHTML = '';
-        participant.characters.forEach(function(char, charIndex) {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.textContent = char.name;
-            a.href = '#';
-            a.onclick = function(e) {
-                e.preventDefault();
-                showCharacter(index, charIndex);
-            };
-            li.appendChild(a);
-            list.appendChild(li);
-        });
-
-        document.getElementById('main-view').classList.add('hidden');
-        document.getElementById('participant-view').classList.remove('hidden');
-        document.getElementById('character-view').classList.add('hidden');
-    }
-
-    // ОТОБРАЖЕНИЕ СТРАНИЦЫ ПЕРСОНАЖА
-    function showCharacter(partIndex, charIndex) {
-        currentParticipant = partIndex;
-        const participant = data[partIndex];
-        const character = participant.characters[charIndex];
-
-        document.getElementById('page-title').textContent = character.name;
-        document.getElementById('character-name').textContent = character.name;
-
-        // Описание персонажа
-        const contentEl = document.getElementById('character-content');
-        contentEl.innerHTML =
-            '<p><strong>Владелец:</strong> <span class="owner-link" onclick="showParticipant(' + partIndex + ')">' +
-            participant.name + '</span></p>' +
-            '<div style="margin-top: 20px; line-height: 1.6; color: #dcdcdc;">' +
-            character.desc +
-            '</div>';
-
-        // Аватарка персонажа
-        const charAvatarEl = document.getElementById('character-avatar');
-        const charAvatarName = 'char-' + character.name.toLowerCase().replace(/\s+/g, '-') + '.png';
-        charAvatarEl.src = 'images/' + charAvatarName;
-        charAvatarEl.alt = character.name;
-        charAvatarEl.style.display = 'block';
-
-        // Если картинка не загрузилась — скрыть её
-        charAvatarEl.onerror = function() {
-            charAvatarEl.style.display = 'none';
-        };
-
-        document.getElementById('main-view').classList.add('hidden');
-        document.getElementById('participant-view').classList.add('hidden');
-        document.getElementById('character-view').classList.remove('hidden');
-    }
-
-    // ЗАПОЛНЕНИЕ ГЛАВНОЙ СТРАНИЦЫ ПРИ ЗАГРУЗКЕ САЙТА
-    window.onload = function() {
-        const list = document.getElementById('participants-list');
-        data.forEach(function(participant, index) {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.textContent = participant.name;
-            a.href = '#';
-            a.onclick = function(e) {
-                e.preventDefault();
-                showParticipant(index);
-            };
-            li.appendChild(a);
-            list.appendChild(li);
-        });
+    <script>
+    // ================================================================
+    //  КОНФИГУРАЦИЯ — ЗАПОЛНИ ЭТИ ПОЛЯ СВОИМИ ДАННЫМИ
+    // ================================================================
+    const CONFIG = {
+        owner: 'ТВОЙ_GITHUB_НИК',     // ← твой GitHub username
+        repo: 'ТВОЙ_РЕПОЗИТОРИЙ',      // ← имя репозитория
+        branch: 'main',               // ← ветка (обычно main)
+        dataFile: 'data.json',        // ← файл с данными
+        adminPassword: 'ТВОЙ_ПАРОЛЬ'   // ← пароль для редактирования
     };
-</script>
 
+    // УТИЛИТЫ
+    function uuid() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+    function rawUrl(path) {
+        return `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
+    }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function extractPath(url) {
+        try {
+            const parts = new URL(url).pathname.split('/');
+            const idx = parts.indexOf(CONFIG.branch);
+            if (idx >= 0) return parts.slice(idx + 1).join('/');
+        } catch (e) {}
+        return null;
+    }
+
+    // GITHUB API
+    const GH = {
+        token: localStorage.getItem('gh_token') || '',
+
+        async getData() {
+            const res = await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}`,
+                { headers: this.token ? { Authorization: `token ${this.token}` } : {} }
+            );
+            if (res.status === 404) return { participants: [] };
+            if (!res.ok) throw new Error('Не удалось загрузить данные (' + res.status + ')');
+            const json = await res.json();
+            const content = decodeURIComponent(escape(atob(json.content)));
+            return JSON.parse(content);
+        },
+
+        async saveData(data) {
+            const clean = JSON.parse(JSON.stringify(data));
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(clean, null, 2))));
+            let sha = null;
+            try {
+                const cur = await fetch(
+                    `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}`,
+                    { headers: { Authorization: `token ${this.token}` } }
+                );
+                if (cur.ok) { const j = await cur.json(); sha = j.sha; }
+            } catch (e) {}
+            const body = { message: 'Обновление data.json', content, branch: CONFIG.branch };
+            if (sha) body.sha = sha;
+            const res = await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`,
+                { method: 'PUT', headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify(body) }
+            );
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || 'Ошибка сохранения (' + res.status + ')');
+            }
+        },
+
+        async uploadImage(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const filename = `uploads/img-${uuid()}.${ext}`;
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            const res = await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${filename}`,
+                { method: 'PUT', headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ message: 'Загрузка изображения', content: base64, branch: CONFIG.branch }) }
+            );
+            if (!res.ok) throw new Error('Не удалось загрузить изображение (' + res.status + ')');
+            return rawUrl(filename);
+        },
+
+        async deleteFile(path) {
+            if (!path) return;
+            const res = await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}`,
+                { headers: { Authorization: `token ${this.token}` } }
+            );
+            if (!res.ok) return;
+            const json = await res.json();
+            await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`,
+                { method: 'DELETE', headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ message: 'Удаление файла', sha: json.sha, branch: CONFIG.branch }) }
+            );
+        }
+    };
+
+    // STATE
+    let state = { data: null, isAdmin: false, loading: true };
+
+    // ROUTER
+    function route() {
+        const hash = location.hash.slice(1) || '/';
+        const parts = hash.split('/').filter(Boolean);
+        if (parts.length === 0) renderMain();
+        else if (parts[0] === 'participant' && parts[1]) {
+            if (parts[2] === 'character' && parts[3]) renderCharacter(parts[1], parts[3]);
+            else renderParticipant(parts[1]);
+        } else renderMain();
+    }
+
+    // РЕНДЕР: ГЛАВНАЯ
+    async function renderMain() {
+        const app = document.getElementById('app');
+        try {
+            if (!state.data) state.data = await GH.getData();
+        } catch (e) { app.innerHTML = `<div class="error-msg">Ошибка: ${e.message}</div>`; return; }
+
+        const participants = state.data.participants || [];
+        let html = `<h1>Участники</h1>`;
+        if (state.isAdmin) html += `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
+
+        if (participants.length === 0) {
+            html += `<div class="empty-state">Пока нет ни одного участника</div>`;
+        } else {
+            html += `<div class="cards-grid">`;
+            for (const p of participants) {
+                const photo = p.photo
+                    ? `<img src="${p.photo}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img" style="display:none">👤</div>`
+                    : `<div class="placeholder-img">👤</div>`;
+                const desc = (p.description || '').slice(0, 80);
+                html += `<div class="card" onclick="location.hash = '/participant/${p.id}'">
+                    ${photo}<h3>${escapeHtml(p.name)}</h3>
+                    <p>${escapeHtml(desc)}${p.description && p.description.length > 80 ? '…' : ''}</p>
+                    ${state.isAdmin ? `<div class="edit-controls" onclick="event.stopPropagation()">
+                        <button class="btn btn-small" onclick="editParticipant('${p.id}')">✎ Изменить</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteParticipant('${p.id}')">🗑 Удалить</button>
+                    </div>` : ''}
+                </div>`;
+            }
+            html += `</div>`;
+        }
+        html += `<button class="btn" onclick="addParticipant()">+ Добавить участника</button>`;
+        app.innerHTML = html;
+    }
+
+    // РЕНДЕР: СТРАНИЦА УЧАСТНИКА
+    async function renderParticipant(id) {
+        const app = document.getElementById('app');
+        if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
+        const participant = (state.data.participants || []).find(p => p.id === id);
+        if (!participant) { app.innerHTML = `<div class="error-msg">Участник не найден</div><button class="btn" onclick="location.hash='/'">На главную</button>`; return; }
+
+        const photo = participant.photo
+            ? `<img src="${participant.photo}" alt="${escapeHtml(participant.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">👤</div>`
+            : `<div class="placeholder-img large">👤</div>`;
+
+        let html = `<button class="btn btn-small back-btn" onclick="location.hash='/'">← Назад</button>`;
+        if (state.isAdmin) html += `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
+
+        html += `<div class="participant-header">${photo}
+            <h2>${escapeHtml(participant.name)}</h2>
+            <p>${escapeHtml(participant.description || 'Описание не задано.')}</p>
+            ${state.isAdmin ? `<div class="edit-controls">
+                <button class="btn btn-small" onclick="editParticipant('${participant.id}')">✎ Изменить</button>
+                <button class="btn btn-small btn-danger" onclick="deleteParticipant('${participant.id}')">🗑 Удалить</button>
+            </div>` : ''}
+        </div>`;
+
+        const characters = participant.characters || [];
+        if (characters.length === 0) {
+            html += `<div class="empty-state">У этого участника пока нет персонажей</div>`;
+        } else {
+            html += `<div class="cards-grid">`;
+            for (const c of characters) {
+                const cPhoto = c.photo
+                    ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img" style="display:none">🎭</div>`
+                    : `<div class="placeholder-img">🎭</div>`;
+                const cDesc = (c.description || '').slice(0, 80);
+                html += `<div class="card" onclick="location.hash = '/participant/${participant.id}/character/${c.id}'">
+                    ${cPhoto}<h3>${escapeHtml(c.name)}</h3>
+                    <p>${escapeHtml(cDesc)}${c.description && c.description.length > 80 ? '…' : ''}</p>
+                    ${state.isAdmin ? `<div class="edit-controls" onclick="event.stopPropagation()">
+                        <button class="btn btn-small" onclick="editCharacter('${participant.id}','${c.id}')">✎ Изменить</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteCharacter('${participant.id}','${c.id}')">🗑 Удалить</button>
+                    </div>` : ''}
+                </div>`;
+            }
+            html += `</div>`;
+        }
+        html += `<button class="btn" onclick="addCharacter('${participant.id}')">+ Добавить персонажа</button>`;
+        app.innerHTML = html;
+    }
+
+    // РЕНДЕР: СТРАНИЦА ПЕРСОНАЖА
+    async function renderCharacter(pid, cid) {
+        const app = document.getElementById('app');
+        if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
+        const p = (state.data.participants || []).find(x => x.id === pid);
+        if (!p) { app.innerHTML = `<div class="error-msg">Участник не найден</div>`; return; }
+        const c = (p.characters || []).find(x => x.id === cid);
+        if (!c) { app.innerHTML = `<div class="error-msg">Персонаж не найден</div>`; return; }
+
+        const photo = c.photo
+            ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">🎭</div>`
+            : `<div class="placeholder-img large">🎭</div>`;
+
+        let html = `<button class="btn btn-small back-btn" onclick="location.hash='/participant/${pid}'">← Назад</button>`;
+        if (state.isAdmin) html += `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
+        html += `<div class="participant-header">${photo}
+            <h2>${escapeHtml(c.name)}</h2>
+            <p>${escapeHtml(c.description || 'Описание не задано.')}</p>
+            <p style="margin-top:10px;opacity:0.5;font-size:14px">Участник: ${escapeHtml(p.name)}</p>
+            ${state.isAdmin ? `<div class="edit-controls">
+                <button class="btn btn-small" onclick="editCharacter('${pid}','${cid}')">✎ Изменить</button>
+                <button class="btn btn-small btn-danger" onclick="deleteCharacter('${pid}','${cid}')">🗑 Удалить</button>
+            </div>` : ''}
+        </div>`;
+        app.innerHTML = html;
+    }
+
+    // АДМИН: ВХОД/ВЫХОД
+    async function checkAdminAccess() {
+        if (state.isAdmin) return true;
+        const password = prompt('Введите пароль для редактирования:');
+        if (password === null) return false;
+        if (password !== CONFIG.adminPassword) { alert('Неверный пароль'); return false; }
+        let token = localStorage.getItem('gh_token');
+        if (!token) {
+            token = prompt('Введите ваш GitHub Personal Access Token\n(нужны права repo):');
+            if (!token || !token.trim()) return false;
+            localStorage.setItem('gh_token', token.trim());
+        }
+        GH.token = token.trim();
+        state.isAdmin = true;
+        return true;
+    }
+    function logout() { state.isAdmin = false; localStorage.removeItem('gh_token'); GH.token = ''; route(); }
+
+    // ФОРМЫ
+    function showForm(html) {
+        const old = document.getElementById('form-overlay'); if (old) old.remove();
+        const o = document.createElement('div'); o.className = 'form-overlay'; o.id = 'form-overlay';
+        o.innerHTML = `<div class="form-box">${html}</div>`;
+        document.body.appendChild(o);
+        o.addEventListener('click', e => { if (e.target === o) o.remove(); });
+    }
+    function closeForm() { const o = document.getElementById('form-overlay'); if (o) o.remove(); }
+    function showLoading(text) {
+        const old = document.getElementById('loading-overlay'); if (old) old.remove();
+        const d = document.createElement('div'); d.className = 'form-overlay'; d.id = 'loading-overlay';
+        d.innerHTML = `<div class="form-box"><p style="text-align:center">${text || 'Загрузка...'}</p></div>`;
+        document.body.appendChild(d);
+    }
+    function closeLoading() { const o = document.getElementById('loading-overlay'); if (o) o.remove(); }
+    async function handleImageUpload(id) {
+        const input = document.getElementById(id);
+        if (!input || !input.files[0]) return null;
+        return await GH.uploadImage(input.files[0]);
+    }
+
+    // УЧАСТНИКИ: добавить / изменить / удалить
+    async function addParticipant() {
+        if (!(await checkAdminAccess())) return;
+        showForm(`<h2>Новый участник</h2>
+            <label>Имя *</label><input type="text" id="p-name" placeholder="Имя участника">
+            <label>Описание</label><textarea id="p-desc" placeholder="Краткое описание"></textarea>
+            <label>Фото</label><input type="file" id="p-photo" accept="image/*">
+            <div class="form-row"><button class="btn" onclick="saveNewParticipant()">Сохранить</button>
+            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+    }
+    async function saveNewParticipant() {
+        const name = document.getElementById('p-name').value.trim();
+        if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('p-desc').value.trim();
+        closeForm(); showLoading('Сохранение...');
+        let photo = null;
+        try { photo = await handleImageUpload('p-photo'); } catch (e) { alert('Фото: ' + e.message); }
+        if (!state.data.participants) state.data.participants = [];
+        state.data.participants.push({ id: uuid(), name, description: desc, photo, characters: [] });
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); renderMain();
+    }
+    async function editParticipant(id) {
+        if (!(await checkAdminAccess())) return;
+        const p = state.data.participants.find(x => x.id === id); if (!p) return;
+        showForm(`<h2>Редактировать участника</h2>
+            <label>Имя *</label><input type="text" id="p-name" value="${escapeHtml(p.name)}">
+            <label>Описание</label><textarea id="p-desc">${escapeHtml(p.description || '')}</textarea>
+            <label>Новое фото (пусто = без изменений)</label><input type="file" id="p-photo" accept="image/*">
+            ${p.photo ? `<p style="opacity:0.6;font-size:13px;margin-bottom:10px">Текущее: <a href="${p.photo}" target="_blank" style="color:#9381ff">открыть</a></p>` : ''}
+            <div class="form-row"><button class="btn" onclick="saveEditParticipant('${id}')">Сохранить</button>
+            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+    }
+    async function saveEditParticipant(id) {
+        const name = document.getElementById('p-name').value.trim();
+        if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('p-desc').value.trim();
+        closeForm(); showLoading('Сохранение...');
+        const p = state.data.participants.find(x => x.id === id); if (!p) { closeLoading(); return; }
+        p.name = name; p.description = desc;
+        const fi = document.getElementById('p-photo');
+        if (fi && fi.files[0]) { try { if (p.photo) await GH.deleteFile(extractPath(p.photo)); p.photo = await GH.uploadImage(fi.files[0]); } catch (e) { alert('Фото: ' + e.message); } }
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); route();
+    }
+    async function deleteParticipant(id) {
+        if (!(await checkAdminAccess())) return;
+        if (!confirm('Удалить участника и всех его персонажей?')) return;
+        showLoading('Удаление...');
+        const p = state.data.participants.find(x => x.id === id);
+        if (p) {
+            if (p.photo) { try { await GH.deleteFile(extractPath(p.photo)); } catch(e) {} }
+            if (p.characters) for (const c of p.characters) if (c.photo) { try { await GH.deleteFile(extractPath(c.photo)); } catch(e) {} }
+        }
+        state.data.participants = state.data.participants.filter(x => x.id !== id);
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); location.hash = '/'; renderMain();
+    }
+
+    // ПЕРСОНАЖИ: добавить / изменить / удалить
+    async function addCharacter(pid) {
+        if (!(await checkAdminAccess())) return;
+        showForm(`<h2>Новый персонаж</h2>
+            <label>Имя *</label><input type="text" id="c-name" placeholder="Имя персонажа">
+            <label>Описание</label><textarea id="c-desc" placeholder="Краткое описание"></textarea>
+            <label>Фото</label><input type="file" id="c-photo" accept="image/*">
+            <div class="form-row"><button class="btn" onclick="saveNewCharacter('${pid}')">Сохранить</button>
+            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+    }
+    async function saveNewCharacter(pid) {
+        const name = document.getElementById('c-name').value.trim();
+        if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('c-desc').value.trim();
+        closeForm(); showLoading('Сохранение...');
+        let photo = null;
+        try { photo = await handleImageUpload('c-photo'); } catch (e) { alert('Фото: ' + e.message); }
+        const p = state.data.participants.find(x => x.id === pid);
+        if (!p.characters) p.characters = [];
+        p.characters.push({ id: uuid(), name, description: desc, photo });
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); renderParticipant(pid);
+    }
+    async function editCharacter(pid, cid) {
+        if (!(await checkAdminAccess())) return;
+        const p = state.data.participants.find(x => x.id === pid); if (!p) return;
+        const c = (p.characters || []).find(x => x.id === cid); if (!c) return;
+        showForm(`<h2>Редактировать персонажа</h2>
+            <label>Имя *</label><input type="text" id="c-name" value="${escapeHtml(c.name)}">
+            <label>Описание</label><textarea id="c-desc">${escapeHtml(c.description || '')}</textarea>
+            <label>Новое фото (пусто = без изменений)</label><input type="file" id="c-photo" accept="image/*">
+            ${c.photo ? `<p style="opacity:0.6;font-size:13px;margin-bottom:10px">Текущее: <a href="${c.photo}" target="_blank" style="color:#9381ff">открыть</a></p>` : ''}
+            <div class="form-row"><button class="btn" onclick="saveEditCharacter('${pid}','${cid}')">Сохранить</button>
+            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+    }
+    async function saveEditCharacter(pid, cid) {
+        const name = document.getElementById('c-name').value.trim();
+        if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('c-desc').value.trim();
+        closeForm(); showLoading('Сохранение...');
+        const p = state.data.participants.find(x => x.id === pid); if (!p) { closeLoading(); return; }
+        const c = (p.characters || []).find(x => x.id === cid); if (!c) { closeLoading(); return; }
+        c.name = name; c.description = desc;
+        const fi = document.getElementById('c-photo');
+        if (fi && fi.files[0]) { try { if (c.photo) await GH.deleteFile(extractPath(c.photo)); c.photo = await GH.uploadImage(fi.files[0]); } catch (e) { alert('Фото: ' + e.message); } }
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); route();
+    }
+    async function deleteCharacter(pid, cid) {
+        if (!(await checkAdminAccess())) return;
+        if (!confirm('Удалить персонажа?')) return;
+        showLoading('Удаление...');
+        const p = state.data.participants.find(x => x.id === pid);
+        if (p && p.characters) {
+            const c = p.characters.find(x => x.id === cid);
+            if (c && c.photo) { try { await GH.deleteFile(extractPath(c.photo)); } catch(e) {} }
+            p.characters = p.characters.filter(x => x.id !== cid);
+        }
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); renderParticipant(pid);
+    }
+
+    // ИНИЦИАЛИЗАЦИЯ
+    window.addEventListener('hashchange', route);
+    route();
+    </script>
 </body>
 </html>
