@@ -154,7 +154,7 @@
         repo: 'riap_roleplay',      // ← имя репозитория
         branch: 'main',               // ← ветка (обычно main)
         dataFile: 'data.json',        // ← файл с данными
-        adminPassword: 'Затаюсь, лишь себя...'   // ← пароль для редактирования
+        adminPassword: '13332Кошь'   // ← пароль для редактирования
     };
 
     // УТИЛИТЫ
@@ -195,28 +195,42 @@
         },
 
         async saveData(data) {
-            const clean = JSON.parse(JSON.stringify(data));
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(clean, null, 2))));
-            let sha = null;
-            try {
-                const cur = await fetch(
-                    `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}`,
-                    { headers: { Authorization: `token ${this.token}` } }
-                );
-                if (cur.ok) { const j = await cur.json(); sha = j.sha; }
-            } catch (e) {}
-            const body = { message: 'Обновление data.json', content, branch: CONFIG.branch };
-            if (sha) body.sha = sha;
-            const res = await fetch(
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`,
-                { method: 'PUT', headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
-                  body: JSON.stringify(body) }
-            );
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || 'Ошибка сохранения (' + res.status + ')');
-            }
-        },
+ async saveData(data) {
+    const clean = JSON.parse(JSON.stringify(data));
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(clean, null, 2))));
+
+    let sha = null;
+    // Получаем текущую версию и sha
+    const curRes = await fetch(
+        `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}`,
+        { headers: { Authorization: `token \${this.token}` } }
+    );
+
+    if (!curRes.ok) {
+        const err = await curRes.json().catch(() => ({}));
+        throw new Error('Не удалось получить текущую версию data.json: ' + (err.message || curRes.status));
+    }
+
+    const cur = await curRes.json();
+    sha = cur.sha;
+
+    const body = { message: 'Обновление data.json', content, branch: CONFIG.branch };
+    if (sha) body.sha = sha;
+
+    const res = await fetch(
+        `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/\${CONFIG.dataFile}`,
+        {
+            method: 'PUT',
+            headers: { Authorization: `token \${this.token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        }
+    );
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Ошибка сохранения (' + res.status + ')');
+    }
+},
 
         async uploadImage(file) {
             const ext = file.name.split('.').pop().toLowerCase();
