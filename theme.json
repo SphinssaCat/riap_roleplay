@@ -17,10 +17,10 @@
   "btnColor1": "#f7dd68",
   "btnColor2": "#fadf43",
   "btnRadius": 15,
-  "btnDanger1": "#c9184a",
-  "btnDanger2": "#ff4d6d",
-  "btnSave1": "#2d6a4f",
-  "btnSave2": "#52b78a",
+  "btnDanger1": "#000000",
+  "btnDanger2": "#000000",
+  "btnSave1": "#7b63ff",
+  "btnSave2": "#6b6bff",
   "accentColor": "#f8ff73",
   "linkColor": "#f8ff73"
 }
