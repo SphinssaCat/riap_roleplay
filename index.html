@@ -194,7 +194,6 @@
             return JSON.parse(content);
         },
 
-        async saveData(data) {
  async saveData(data) {
     const clean = JSON.parse(JSON.stringify(data));
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(clean, null, 2))));
