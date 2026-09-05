@@ -105,3 +105,538 @@
             background: rgba(147, 129, 255, 0.3);
             border: 1px solid rgba(147, 129, 255, 0.5);
             border-radius: 20px; padding: 6px 16px; font-size: 13px;
+        }
+        .admin-badge button {
+            background: none; border: none; color: #fff; cursor: pointer;
+            font-size: 12px; text-decoration: underline; opacity: 0.7;
+        }
+        .edit-controls { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+
+        .placeholder-img {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: rgba(255,255,255,0.1); display: flex;
+            align-items: center; justify-content: center;
+            margin: 0 auto 10px; font-size: 40px;
+        }
+        .placeholder-img.large { width: 150px; height: 150px; }
+        .empty-state { text-align: center; padding: 40px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div id="admin-btn-container"></div>
+    <div id="app"></div>
+
+    <script>
+    // ================================================================
+    // КОНФИГУРАЦИЯ — ЗАПОЛНИ ЭТИ ПОЛЯ СВОИМИ ДАННЫМИ
+    // ================================================================
+    const CONFIG = {
+        owner: 'SphinssaCat',
+        repo: 'riap_roleplay',
+        branch: 'main',
+        dataFile: 'data.json',
+        adminPassword: '1550155Кощь'  // ← смени пароль!
+    };
+
+    // УТИЛИТЫ
+    function uuid() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+    function rawUrl(path) {
+        return `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
+    }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function extractPath(url) {
+        try {
+            const parts = new URL(url).pathname.split('/');
+            const idx = parts.indexOf(CONFIG.branch);
+            if (idx >= 0) return parts.slice(idx + 1).join('/');
+        } catch (e) {}
+        return null;
+    }
+
+    // GITHUB API
+    const GH = {
+        token: localStorage.getItem('gh_token') || '',
+        saving: false,
+
+        async getData() {
+            const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}&t=${Date.now()}`;
+            const headers = this.token ? { Authorization: `token ${this.token}` } : {};
+
+            const res = await fetch(url, { headers });
+            if (res.status === 404) return { participants: [] };
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `Ошибка загрузки данных: ${res.status}`);
+            }
+            const json = await res.json();
+            const content = decodeURIComponent(escape(atob(json.content)));
+            return JSON.parse(content);
+        },
+
+        async saveData(data) {
+            if (this.saving) throw new Error('Сохранение уже выполняется');
+            this.saving = true;
+
+            if (!this.token) throw new Error('Не установлен GitHub Token. Войдите как админ.');
+
+            const clean = JSON.parse(JSON.stringify(data));
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(clean, null, 2))));
+
+            // GET с cache-busting
+            const curRes = await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}&t=${Date.now()}`,
+                { headers: { Authorization: `token ${this.token}` } }
+            );
+
+            let sha = null;
+            if (curRes.ok) {
+                const cur = await curRes.json();
+                sha = cur.sha;
+            }
+
+            const body = {
+                message: 'Обновление data.json',
+                content,
+                branch: CONFIG.branch
+            };
+            if (sha) body.sha = sha;
+
+            const res = await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `token ${this.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                }
+            );
+
+            this.saving = false;
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `Ошибка сохранения (${res.status})`);
+            }
+
+            const result = await res.json();
+            this._lastSha = result.content && result.content.sha ? result.content.sha : null;
+        },
+
+        async uploadImage(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const filename = `uploads/img-${uuid()}.${ext}`;
+
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+
+            const res = await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${filename}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `token ${this.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Загрузка изображения',
+                        content: base64,
+                        branch: CONFIG.branch
+                    })
+                }
+            );
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error('Не удалось загрузить изображение: ' + (err.message || res.status));
+            }
+            return rawUrl(filename);
+        },
+
+        async deleteFile(path) {
+            if (!path) return;
+            const res = await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}`,
+                { headers: { Authorization: `token ${this.token}` } }
+            );
+            if (!res.ok) return;
+            const json = await res.json();
+
+            await fetch(
+                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `token ${this.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Удаление файла',
+                        sha: json.sha,
+                        branch: CONFIG.branch
+                    })
+                }
+            );
+        }
+    };
+
+    // STATE
+    let state = {
+        data: null,
+        isAdmin: localStorage.getItem('isAdmin') === 'true',
+        loading: true
+    };
+
+    // КНОПКА АДМИНА (всегда в правом верхнем углу)
+    function renderAdminBtn() {
+        const container = document.getElementById('admin-btn-container');
+        if (state.isAdmin) {
+            container.innerHTML = `<div class="admin-badge">👑 Админ <button onclick="logout()">Выйти</button></div>`;
+        } else {
+            container.innerHTML = `<div class="admin-badge"><button onclick="loginAdmin()">Войти</button></div>`;
+        }
+    }
+
+    // АДМИН: ВХОД
+    async function loginAdmin() {
+        const password = prompt('Введите пароль для редактирования:');
+        if (password === null) return false;
+        if (password !== CONFIG.adminPassword) { alert('Неверный пароль'); return false; }
+
+        let token = localStorage.getItem('gh_token');
+        if (!token) {
+            token = prompt('Введите ваш GitHub Personal Access Token\n(нужны права repo):');
+            if (!token || !token.trim()) return false;
+            localStorage.setItem('gh_token', token.trim());
+        }
+        GH.token = token.trim();
+        state.isAdmin = true;
+        localStorage.setItem('isAdmin', 'true');
+        renderAdminBtn();
+        route();
+        return true;
+    }
+
+            // АДМИН: ВЫХОД
+    function logout() {
+        state.isAdmin = false;
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('gh_token');
+        GH.token = '';
+        renderAdminBtn();
+        route();
+    }
+
+    // Проверка доступа при попытке редактировать
+    async function checkAdminAccess() {
+        if (state.isAdmin) return true;
+        return await loginAdmin();
+    }
+
+    // РУЧНОЕ СОХРАНЕНИЕ
+    async function manualSave() {
+        if (!(await checkAdminAccess())) return;
+        if (!state.data) { alert('Нет данных для сохранения'); return; }
+        if (GH.saving) { alert('Сохранение уже выполняется, подождите...'); return; }
+        showLoading('Сохранение на GitHub...');
+        try {
+            await GH.saveData(state.data);
+            closeLoading();
+            alert('Изменения сохранены!');
+        } catch (e) {
+            closeLoading();
+            alert('Ошибка сохранения: ' + e.message);
+        }
+    }
+
+    // ROUTER
+    function route() {
+        const hash = location.hash.slice(1) || '/';
+        const parts = hash.split('/').filter(Boolean);
+        if (parts.length === 0) {
+            renderMain();
+        } else if (parts[0] === 'participant' && parts[1]) {
+            if (parts[2] === 'character' && parts[3]) {
+                renderCharacter(parts[1], parts[3]);
+            } else {
+                renderParticipant(parts[1]);
+            }
+        } else {
+            renderMain();
+        }
+    }
+
+    // РЕНДЕР: ГЛАВНАЯ
+    async function renderMain() {
+        const app = document.getElementById('app');
+        try {
+            if (!state.data) state.data = await GH.getData();
+        } catch (e) { app.innerHTML = `<div class="error-msg">Ошибка: ${e.message}</div>`; return; }
+
+        const participants = state.data.participants || [];
+        let html = `<h1>Участники</h1>`;
+
+        if (participants.length === 0) {
+            html += `<div class="empty-state">Пока нет ни одного участника</div>`;
+        } else {
+            html += `<div class="cards-grid">`;
+            for (const p of participants) {
+                const photo = p.photo
+                    ? `<img src="${p.photo}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img" style="display:none">👤</div>`
+                    : `<div class="placeholder-img">👤</div>`;
+                const desc = (p.description || '').slice(0, 80);
+                html += `<div class="card" onclick="location.hash = '/participant/${p.id}'">
+                    ${photo}<h3>${escapeHtml(p.name)}</h3>
+                    <p>${escapeHtml(desc)}${p.description && p.description.length > 80 ? '…' : ''}</p>
+                    ${state.isAdmin ? `<div class="edit-controls" onclick="event.stopPropagation()">
+                        <button class="btn btn-small" onclick="editParticipant('${p.id}')">✎ Изменить</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteParticipant('${p.id}')">🗑 Удалить</button>
+                    </div>` : ''}
+                </div>`;
+            }
+            html += `</div>`;
+        }
+        html += `<div class="action-row">`;
+        html += `<button class="btn" onclick="addParticipant()">+ Добавить участника</button>`;
+        if (state.isAdmin) html += `<button class="btn" style="background:linear-gradient(135deg,#2d6a4f,#52b78a)" onclick="manualSave()">💾 Сохранить</button>`;
+        html += `</div>`;
+        app.innerHTML = html;
+    }
+
+    // РЕНДЕР: СТРАНИЦА УЧАСТНИКА
+    async function renderParticipant(id) {
+        const app = document.getElementById('app');
+        if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
+        const participant = (state.data.participants || []).find(p => p.id === id);
+        if (!participant) { app.innerHTML = `<div class="error-msg">Участник не найден</div><button class="btn" onclick="location.hash='/'">На главную</button>`; return; }
+
+        const photo = participant.photo
+            ? `<img src="${participant.photo}" alt="${escapeHtml(participant.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">👤</div>`
+            : `<div class="placeholder-img large">👤</div>`;
+
+        let html = `<button class="btn btn-small back-btn" onclick="location.hash='/'">← Назад</button>`;
+
+        html += `<div class="participant-header">${photo}
+            <h2>${escapeHtml(participant.name)}</h2>
+            <p>${escapeHtml(participant.description || 'Описание не задано.')}</p>
+            ${state.isAdmin ? `<div class="edit-controls">
+                <button class="btn btn-small" onclick="editParticipant('${participant.id}')">✎ Изменить</button>
+                <button class="btn btn-small btn-danger" onclick="deleteParticipant('${participant.id}')">🗑 Удалить</button>
+            </div>` : ''}
+        </div>`;
+
+        const characters = participant.characters || [];
+        if (characters.length === 0) {
+            html += `<div class="empty-state">У этого участника пока нет персонажей</div>`;
+        } else {
+            html += `<div class="cards-grid">`;
+            for (const c of characters) {
+                const cPhoto = c.photo
+                    ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img" style="display:none">🎭</div>`
+                    : `<div class="placeholder-img">🎭</div>`;
+                const cDesc = (c.description || '').slice(0, 80);
+                html += `<div class="card" onclick="location.hash = '/participant/${participant.id}/character/${c.id}'">
+                    ${cPhoto}<h3>${escapeHtml(c.name)}</h3>
+                    <p>${escapeHtml(cDesc)}${c.description && c.description.length > 80 ? '…' : ''}</p>
+                    ${state.isAdmin ? `<div class="edit-controls" onclick="event.stopPropagation()">
+                        <button class="btn btn-small" onclick="editCharacter('${participant.id}','${c.id}')">✎ Изменить</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteCharacter('${participant.id}','${c.id}')">🗑 Удалить</button>
+                    </div>` : ''}
+                </div>`;
+            }
+            html += `</div>`;
+        }
+        html += `<div class="action-row">`;
+        html += `<button class="btn" onclick="addCharacter('${participant.id}')">+ Добавить персонажа</button>`;
+        if (state.isAdmin) html += `<button class="btn" style="background:linear-gradient(135deg,#2d6a4f,#52b78a)" onclick="manualSave()">💾 Сохранить</button>`;
+        html += `</div>`;
+        app.innerHTML = html;
+    }
+
+    // РЕНДЕР: СТРАНИЦА ПЕРСОНАЖА
+    async function renderCharacter(pid, cid) {
+        const app = document.getElementById('app');
+        if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
+        const p = (state.data.participants || []).find(x => x.id === pid);
+        if (!p) { app.innerHTML = `<div class="error-msg">Участник не найден</div>`; return; }
+        const c = (p.characters || []).find(x => x.id === cid);
+        if (!c) { app.innerHTML = `<div class="error-msg">Персонаж не найден</div>`; return; }
+
+        const photo = c.photo
+            ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">🎭</div>`
+            : `<div class="placeholder-img large">🎭</div>`;
+
+        let html = `<button class="btn btn-small back-btn" onclick="location.hash='/participant/${pid}'">← Назад</button>`;
+        html += `<div class="participant-header">${photo}
+            <h2>${escapeHtml(c.name)}</h2>
+            <p>${escapeHtml(c.description || 'Описание не задано.')}</p>
+            <p style="margin-top:10px;opacity:0.5;font-size:14px">Участник: ${escapeHtml(p.name)}</p>
+            ${state.isAdmin ? `<div class="edit-controls">
+                <button class="btn btn-small" onclick="editCharacter('${pid}','${cid}')">✎ Изменить</button>
+                <button class="btn btn-small btn-danger" onclick="deleteCharacter('${pid}','${cid}')">🗑 Удалить</button>
+            </div>` : ''}
+        </div>`;
+        app.innerHTML = html;
+    }
+
+    // ФОРМЫ
+    function showForm(html) {
+        const old = document.getElementById('form-overlay'); if (old) old.remove();
+        const o = document.createElement('div'); o.className = 'form-overlay'; o.id = 'form-overlay';
+        o.innerHTML = `<div class="form-box">${html}</div>`;
+        document.body.appendChild(o);
+        o.addEventListener('click', e => { if (e.target === o) o.remove(); });
+    }
+    function closeForm() { const o = document.getElementById('form-overlay'); if (o) o.remove(); }
+    function showLoading(text) {
+        const old = document.getElementById('loading-overlay'); if (old) old.remove();
+        const d = document.createElement('div'); d.className = 'form-overlay'; d.id = 'loading-overlay';
+        d.innerHTML = `<div class="form-box"><p style="text-align:center">${text || 'Загрузка...'}</p></div>`;
+        document.body.appendChild(d);
+    }
+    function closeLoading() { const o = document.getElementById('loading-overlay'); if (o) o.remove(); }
+    async function handleImageUpload(id) {
+        const input = document.getElementById(id);
+        if (!input || !input.files[0]) return null;
+        return await GH.uploadImage(input.files[0]);
+    }
+
+    // УЧАСТНИКИ: добавить / изменить / удалить
+    async function addParticipant() {
+        if (!(await checkAdminAccess())) return;
+        showForm(`<h2>Новый участник</h2>
+            <label>Имя *</label><input type="text" id="p-name" placeholder="Имя участника">
+            <label>Описание</label><textarea id="p-desc" placeholder="Краткое описание"></textarea>
+            <label>Фото</label><input type="file" id="p-photo" accept="image/*">
+            <div class="form-row"><button class="btn" onclick="saveNewParticipant()">Сохранить</button>
+            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+    }
+    async function saveNewParticipant() {
+        const name = document.getElementById('p-name').value.trim();
+        if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('p-desc').value.trim();
+        closeForm(); showLoading('Сохранение...');
+        let photo = null;
+        try { photo = await handleImageUpload('p-photo'); } catch (e) { alert('Фото: ' + e.message); }
+        if (!state.data.participants) state.data.participants = [];
+        state.data.participants.push({ id: uuid(), name, description: desc, photo, characters: [] });
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); renderMain();
+    }
+    async function editParticipant(id) {
+        if (!(await checkAdminAccess())) return;
+        const p = state.data.participants.find(x => x.id === id); if (!p) return;
+        showForm(`<h2>Редактировать участника</h2>
+            <label>Имя *</label><input type="text" id="p-name" value="${escapeHtml(p.name)}">
+            <label>Описание</label><textarea id="p-desc">${escapeHtml(p.description || '')}</textarea>
+            <label>Новое фото (пусто = без изменений)</label><input type="file" id="p-photo" accept="image/*">
+            ${p.photo ? `<p style="opacity:0.6;font-size:13px;margin-bottom:10px">Текущее: <a href="${p.photo}" target="_blank" style="color:#9381ff">открыть</a></p>` : ''}
+            <div class="form-row"><button class="btn" onclick="saveEditParticipant('${id}')">Сохранить</button>
+            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+    }
+    async function saveEditParticipant(id) {
+        const name = document.getElementById('p-name').value.trim();
+        if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('p-desc').value.trim();
+        closeForm(); showLoading('Сохранение...');
+        const p = state.data.participants.find(x => x.id === id); if (!p) { closeLoading(); return; }
+        p.name = name; p.description = desc;
+        const fi = document.getElementById('p-photo');
+        if (fi && fi.files[0]) { try { if (p.photo) await GH.deleteFile(extractPath(p.photo)); p.photo = await GH.uploadImage(fi.files[0]); } catch (e) { alert('Фото: ' + e.message); } }
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); route();
+    }
+    async function deleteParticipant(id) {
+        if (!(await checkAdminAccess())) return;
+        if (!confirm('Удалить участника и всех его персонажей?')) return;
+        showLoading('Удаление...');
+        const p = state.data.participants.find(x => x.id === id);
+        if (p) {
+            if (p.photo) { try { await GH.deleteFile(extractPath(p.photo)); } catch(e) {} }
+            if (p.characters) for (const c of p.characters) if (c.photo) { try { await GH.deleteFile(extractPath(c.photo)); } catch(e) {} }
+        }
+        state.data.participants = state.data.participants.filter(x => x.id !== id);
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); location.hash = '/'; renderMain();
+    }
+
+    // ПЕРСОНАЖИ: добавить / изменить / удалить
+    async function addCharacter(pid) {
+        if (!(await checkAdminAccess())) return;
+        showForm(`<h2>Новый персонаж</h2>
+            <label>Имя *</label><input type="text" id="c-name" placeholder="Имя персонажа">
+            <label>Описание</label><textarea id="c-desc" placeholder="Краткое описание"></textarea>
+            <label>Фото</label><input type="file" id="c-photo" accept="image/*">
+            <div class="form-row"><button class="btn" onclick="saveNewCharacter('${pid}')">Сохранить</button>
+            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+    }
+    async function saveNewCharacter(pid) {
+        const name = document.getElementById('c-name').value.trim();
+        if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('c-desc').value.trim();
+        closeForm(); showLoading('Сохранение...');
+        let photo = null;
+        try { photo = await handleImageUpload('c-photo'); } catch (e) { alert('Фото: ' + e.message); }
+        const p = state.data.participants.find(x => x.id === pid);
+        if (!p.characters) p.characters = [];
+        p.characters.push({ id: uuid(), name, description: desc, photo });
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); renderParticipant(pid);
+    }
+    async function editCharacter(pid, cid) {
+        if (!(await checkAdminAccess())) return;
+        const p = state.data.participants.find(x => x.id === pid); if (!p) return;
+        const c = (p.characters || []).find(x => x.id === cid); if (!c) return;
+        showForm(`<h2>Редактировать персонажа</h2>
+            <label>Имя *</label><input type="text" id="c-name" value="${escapeHtml(c.name)}">
+            <label>Описание</label><textarea id="c-desc">${escapeHtml(c.description || '')}</textarea>
+            <label>Новое фото (пусто = без изменений)</label><input type="file" id="c-photo" accept="image/*">
+            ${c.photo ? `<p style="opacity:0.6;font-size:13px;margin-bottom:10px">Текущее: <a href="${c.photo}" target="_blank" style="color:#9381ff">открыть</a></p>` : ''}
+            <div class="form-row"><button class="btn" onclick="saveEditCharacter('${pid}','${cid}')">Сохранить</button>
+            <button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>`);
+    }
+    async function saveEditCharacter(pid, cid) {
+        const name = document.getElementById('c-name').value.trim();
+        if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('c-desc').value.trim();
+        closeForm(); showLoading('Сохранение...');
+        const p = state.data.participants.find(x => x.id === pid); if (!p) { closeLoading(); return; }
+        const c = (p.characters || []).find(x => x.id === cid); if (!c) { closeLoading(); return; }
+        c.name = name; c.description = desc;
+        const fi = document.getElementById('c-photo');
+        if (fi && fi.files[0]) { try { if (c.photo) await GH.deleteFile(extractPath(c.photo)); c.photo = await GH.uploadImage(fi.files[0]); } catch (e) { alert('Фото: ' + e.message); } }
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); route();
+    }
+    async function deleteCharacter(pid, cid) {
+        if (!(await checkAdminAccess())) return;
+        if (!confirm('Удалить персонажа?')) return;
+        showLoading('Удаление...');
+        const p = state.data.participants.find(x => x.id === pid);
+        if (p && p.characters) {
+            const c = p.characters.find(x => x.id === cid);
+            if (c && c.photo) { try { await GH.deleteFile(extractPath(c.photo)); } catch(e) {} }
+            p.characters = p.characters.filter(x => x.id !== cid);
+        }
+        try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
+        closeLoading(); renderParticipant(pid);
+    }
+
+    // ИНИЦИАЛИЗАЦИЯ
+    window.addEventListener('hashchange', route);
+    renderAdminBtn();
+    route();
+    </script>
+</body>
+</html>
