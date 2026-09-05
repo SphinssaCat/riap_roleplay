@@ -1,9 +1,9 @@
 {
   "bgType": "gradient",
-  "bgColor1": "#f0e462",
-  "bgColor2": "#f0e675",
-  "bgColor3": "#7a81ff",
-  "bgColor4": "#9f6bff",
+  "bgColor1": "#000000",
+  "bgColor2": "#000000",
+  "bgColor3": "#000000",
+  "bgColor4": "#000000",
   "bgSolid": "#1a1a2e",
   "bgImage": "",
   "bgImageBlend": "overlay",
