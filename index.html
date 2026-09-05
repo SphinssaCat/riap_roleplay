@@ -429,7 +429,7 @@
 
         html += `<div class="participant-header">${photo}
             <h2>${escapeHtml(participant.name)}</h2>
-            <p>${escapeHtml(participant.description || 'Описание не задано.')}</p>
+            ${formatDescription(participant.description)}
             ${state.isAdmin ? `<div class="edit-controls">
                 <button class="btn btn-small" onclick="editParticipant('${participant.id}')">✎ Изменить</button>
                 <button class="btn btn-small btn-danger" onclick="deleteParticipant('${participant.id}')">🗑 Удалить</button>
@@ -480,7 +480,7 @@
         let html = `<button class="btn btn-small back-btn" onclick="location.hash='/participant/${pid}'">← Назад</button>`;
         html += `<div class="participant-header">${photo}
             <h2>${escapeHtml(c.name)}</h2>
-            <p>${escapeHtml(c.description || 'Описание не задано.')}</p>
+            ${formatDescription(c.description)}
             <p style="margin-top:10px;opacity:0.5;font-size:14px">Участник: ${escapeHtml(p.name)}</p>
             ${state.isAdmin ? `<div class="edit-controls">
                 <button class="btn btn-small" onclick="editCharacter('${pid}','${cid}')">✎ Изменить</button>
