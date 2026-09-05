@@ -95,6 +95,9 @@
             width: 150px; height: 150px; border-radius: 50%;
             object-fit: cover; margin-bottom: 15px;
         }
+        
+        .description-block p { margin-bottom: 12px; line-height: 1.6; }
+.description-block p:last-child { margin-bottom: 0; }
 
         .back-btn { position: fixed; top: 20px; left: 20px; z-index: 50; }
         .loading { text-align: center; padding: 40px; opacity: 0.6; }
@@ -158,6 +161,14 @@
         } catch (e) {}
         return null;
     }
+        function formatDescription(text) {
+    if (!text) return '<p style="opacity:0.5">Описание не задано.</p>';
+    return text
+        .split(/\r?\n/)
+        .filter(line => line.trim() !== '')
+        .map(line => `<p>${escapeHtml(line)}</p>`)
+        .join('');
+}
 
     // GITHUB API
     const GH = {
@@ -415,80 +426,80 @@
     }
 
     // РЕНДЕР: СТРАНИЦА УЧАСТНИКА
-    async function renderParticipant(id) {
-        const app = document.getElementById('app');
-        if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
-        const participant = (state.data.participants || []).find(p => p.id === id);
-        if (!participant) { app.innerHTML = `<div class="error-msg">Участник не найден</div><button class="btn" onclick="location.hash='/'">На главную</button>`; return; }
+async function renderParticipant(id) {
+    const app = document.getElementById('app');
+    if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
+    const participant = (state.data.participants || []).find(p => p.id === id);
+    if (!participant) { app.innerHTML = `<div class="error-msg">Участник не найден</div><button class="btn" onclick="location.hash='/'">На главную</button>`; return; }
 
-        const photo = participant.photo
-            ? `<img src="${participant.photo}" alt="${escapeHtml(participant.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">👤</div>`
-            : `<div class="placeholder-img large">👤</div>`;
+    const photo = participant.photo
+        ? `<img src="${participant.photo}" alt="${escapeHtml(participant.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">👤</div>`
+        : `<div class="placeholder-img large">👤</div>`;
 
-        let html = `<button class="btn btn-small back-btn" onclick="location.hash='/'">← Назад</button>`;
+    let html = `<button class="btn btn-small back-btn" onclick="location.hash='/'">← Назад</button>`;
 
-        html += `<div class="participant-header">${photo}
-            <h2>${escapeHtml(participant.name)}</h2>
-            ${formatDescription(participant.description)}
-            ${state.isAdmin ? `<div class="edit-controls">
-                <button class="btn btn-small" onclick="editParticipant('${participant.id}')">✎ Изменить</button>
-                <button class="btn btn-small btn-danger" onclick="deleteParticipant('${participant.id}')">🗑 Удалить</button>
-            </div>` : ''}
-        </div>`;
+    html += `<div class="participant-header">${photo}
+        <h2>${escapeHtml(participant.name)}</h2>
+        <div class="description-block">${formatDescription(participant.description)}</div>
+        ${state.isAdmin ? `<div class="edit-controls">
+            <button class="btn btn-small" onclick="editParticipant('${participant.id}')">✎ Изменить</button>
+            <button class="btn btn-small btn-danger" onclick="deleteParticipant('${participant.id}')">🗑 Удалить</button>
+        </div>` : ''}
+    </div>`;
 
-        const characters = participant.characters || [];
-        if (characters.length === 0) {
-            html += `<div class="empty-state">У этого участника пока нет персонажей</div>`;
-        } else {
-            html += `<div class="cards-grid">`;
-            for (const c of characters) {
-                const cPhoto = c.photo
-                    ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img" style="display:none">🎭</div>`
-                    : `<div class="placeholder-img">🎭</div>`;
-                const cDesc = (c.description || '').slice(0, 80);
-                html += `<div class="card" onclick="location.hash = '/participant/${participant.id}/character/${c.id}'">
-                    ${cPhoto}<h3>${escapeHtml(c.name)}</h3>
-                    <p>${escapeHtml(cDesc)}${c.description && c.description.length > 80 ? '…' : ''}</p>
-                    ${state.isAdmin ? `<div class="edit-controls" onclick="event.stopPropagation()">
-                        <button class="btn btn-small" onclick="editCharacter('${participant.id}','${c.id}')">✎ Изменить</button>
-                        <button class="btn btn-small btn-danger" onclick="deleteCharacter('${participant.id}','${c.id}')">🗑 Удалить</button>
-                    </div>` : ''}
-                </div>`;
-            }
-            html += `</div>`;
+    const characters = participant.characters || [];
+    if (characters.length === 0) {
+        html += `<div class="empty-state">У этого участника пока нет персонажей</div>`;
+    } else {
+        html += `<div class="cards-grid">`;
+        for (const c of characters) {
+            const cPhoto = c.photo
+                ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img" style="display:none">🎭</div>`
+                : `<div class="placeholder-img">🎭</div>`;
+            const cDesc = (c.description || '').slice(0, 80);
+            html += `<div class="card" onclick="location.hash = '/participant/${participant.id}/character/${c.id}'">
+                ${cPhoto}<h3>${escapeHtml(c.name)}</h3>
+                <p>${escapeHtml(cDesc)}${c.description && c.description.length > 80 ? '…' : ''}</p>
+                ${state.isAdmin ? `<div class="edit-controls" onclick="event.stopPropagation()">
+                    <button class="btn btn-small" onclick="editCharacter('${participant.id}','${c.id}')">✎ Изменить</button>
+                    <button class="btn btn-small btn-danger" onclick="deleteCharacter('${participant.id}','${c.id}')">🗑 Удалить</button>
+                </div>` : ''}
+            </div>`;
         }
-        html += `<div class="action-row">`;
-        html += `<button class="btn" onclick="addCharacter('${participant.id}')">+ Добавить персонажа</button>`;
-        if (state.isAdmin) html += `<button class="btn" style="background:linear-gradient(135deg,#2d6a4f,#52b78a)" onclick="manualSave()">💾 Сохранить</button>`;
         html += `</div>`;
-        app.innerHTML = html;
     }
+    html += `<div class="action-row">`;
+    html += `<button class="btn" onclick="addCharacter('${participant.id}')">+ Добавить персонажа</button>`;
+    if (state.isAdmin) html += `<button class="btn" style="background:linear-gradient(135deg,#2d6a4f,#52b78a)" onclick="manualSave()">💾 Сохранить</button>`;
+    html += `</div>`;
+    app.innerHTML = html;
+}
 
     // РЕНДЕР: СТРАНИЦА ПЕРСОНАЖА
-    async function renderCharacter(pid, cid) {
-        const app = document.getElementById('app');
-        if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
-        const p = (state.data.participants || []).find(x => x.id === pid);
-        if (!p) { app.innerHTML = `<div class="error-msg">Участник не найден</div>`; return; }
-        const c = (p.characters || []).find(x => x.id === cid);
-        if (!c) { app.innerHTML = `<div class="error-msg">Персонаж не найден</div>`; return; }
+async function renderCharacter(pid, cid) {
+    const app = document.getElementById('app');
+    if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = `<div class="error-msg">${e.message}</div>`; return; } }
+    const p = (state.data.participants || []).find(x => x.id === pid);
+    if (!p) { app.innerHTML = `<div class="error-msg">Участник не найден</div>`; return; }
+    const c = (p.characters || []).find(x => x.id === cid);
+    if (!c) { app.innerHTML = `<div class="error-msg">Персонаж не найден</div>`; return; }
 
-        const photo = c.photo
-            ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">🎭</div>`
-            : `<div class="placeholder-img large">🎭</div>`;
+    const photo = c.photo
+        ? `<img src="${c.photo}" alt="${escapeHtml(c.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="placeholder-img large" style="display:none">🎭</div>`
+        : `<div class="placeholder-img large">🎭</div>`;
 
-        let html = `<button class="btn btn-small back-btn" onclick="location.hash='/participant/${pid}'">← Назад</button>`;
-        html += `<div class="participant-header">${photo}
-            <h2>${escapeHtml(c.name)}</h2>
-            ${formatDescription(c.description)}
-            <p style="margin-top:10px;opacity:0.5;font-size:14px">Участник: ${escapeHtml(p.name)}</p>
-            ${state.isAdmin ? `<div class="edit-controls">
-                <button class="btn btn-small" onclick="editCharacter('${pid}','${cid}')">✎ Изменить</button>
-                <button class="btn btn-small btn-danger" onclick="deleteCharacter('${pid}','${cid}')">🗑 Удалить</button>
-            </div>` : ''}
-        </div>`;
-        app.innerHTML = html;
-    }
+    let html = `<button class="btn btn-small back-btn" onclick="location.hash='/participant/${pid}'">← Назад</button>`;
+    html += `<div class="participant-header">${photo}
+        <h2>${escapeHtml(c.name)}</h2>
+        <div class="description-block">${formatDescription(c.description)}</div>
+        <p style="margin-top:10px;opacity:0.5;font-size:14px">Участник: ${escapeHtml(p.name)}</p>
+        ${state.isAdmin ? `<div class="edit-controls">
+            <button class="btn btn-small" onclick="editCharacter('${pid}','${cid}')">✎ Изменить</button>
+            <button class="btn btn-small btn-danger" onclick="deleteCharacter('${pid}','${cid}')">🗑 Удалить</button>
+        </div>` : ''}
+    </div>`;
+    app.innerHTML = html;
+}
 
     // ФОРМЫ
     function showForm(html) {
