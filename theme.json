@@ -22,5 +22,7 @@
   "btnSave1": "#7b63ff",
   "btnSave2": "#6b6bff",
   "accentColor": "#f8ff73",
-  "linkColor": "#f8ff73"
+  "linkColor": "#f8ff73",
+  "cardHoverGlowIntensity": 0,
+  "galleryImgRadius": 4
 }
