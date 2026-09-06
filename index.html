@@ -6,8 +6,6 @@
     <title>Участники и персонажи</title>
     <style>
         :root {
-            /* === НАСТРАИВАЕМЫЕ ПЕРЕМЕННЫЕ ОФОРМЛЕНИЯ === */
-            --bg-type: gradient;
             --bg-color1: #1a1a2e;
             --bg-color2: #16213e;
             --bg-color3: #0f3460;
@@ -15,6 +13,9 @@
             --bg-solid: #1a1a2e;
             --bg-image: none;
             --bg-image-blend: overlay;
+            --bg-overlay-color: #000000;
+            --bg-overlay-opacity: 0;
+            --gradient-speed: 15s;
             --font-family: 'Segoe UI', system-ui, sans-serif;
             --font-size-base: 16px;
             --text-color: #ffffff;
@@ -22,6 +23,11 @@
             --card-bg-hover: rgba(255, 255, 255, 0.15);
             --card-border: rgba(255, 255, 255, 0.2);
             --card-radius: 16px;
+            --card-padding: 20px;
+            --card-gap: 20px;
+            --card-preview-radius: 12px;
+            --gallery-img-radius: 12px;
+            --gallery-gap: 10px;
             --btn-color1: #6a4c93;
             --btn-color2: #9381ff;
             --btn-radius: 12px;
@@ -29,8 +35,19 @@
             --btn-color-danger2: #ff4d6d;
             --btn-color-save1: #2d6a4f;
             --btn-color-save2: #52b78a;
+            --btn-bg-image: none;
+            --btn-text-color: #ffffff;
+            --btn-glow-color: #9381ff;
+            --btn-glow-intensity: 20px;
+            --btn-text-shadow-color: #000000;
             --accent-color: #9381ff;
             --link-color: #9381ff;
+            --title-font-size: 2em;
+            --title-font-weight: 700;
+            --title-transform: none;
+            --title-spacing: 0px;
+            --card-hover-glow-color: #9381ff;
+            --card-hover-glow-intensity: 20px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,8 +61,9 @@
         body.bg-gradient {
             background: linear-gradient(-45deg, var(--bg-color1), var(--bg-color2), var(--bg-color3), var(--bg-color4));
             background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            animation: gradientShift var(--gradient-speed) ease infinite;
         }
+        body.bg-gradient.no-anim { animation: none; }
         body.bg-image {
             background-image: var(--bg-image);
             background-size: cover;
@@ -54,18 +72,32 @@
             background-blend-mode: var(--bg-image-blend);
             background-color: var(--bg-solid);
         }
+        body.bg-image::before {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-overlay-color);
+            opacity: var(--bg-overlay-opacity);
+            z-index: -1;
+            pointer-events: none;
+        }
         @keyframes gradientShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        #app { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        h1 { text-align: center; margin: 30px 0; font-size: 2em; }
+        #app { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+        h1 {
+            text-align: center; margin: 30px 0;
+            font-size: var(--title-font-size);
+            font-weight: var(--title-font-weight);
+            text-transform: var(--title-transform);
+            letter-spacing: var(--title-spacing);
+        }
 
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+            gap: var(--card-gap);
             margin-bottom: 30px;
         }
         .card {
@@ -73,43 +105,58 @@
             backdrop-filter: blur(10px);
             border: 1px solid var(--card-border);
             border-radius: var(--card-radius);
-            padding: 20px;
+            padding: var(--card-padding);
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.3s, border-color 0.3s;
             text-align: center;
         }
-        .card:hover {
-            transform: scale(1.03);
-            background: var(--card-bg-hover);
+        body.card-hover-scale .card:hover { transform: scale(1.03); }
+        body.card-hover-lift .card:hover { transform: translateY(-6px); }
+        body.card-hover-glow .card:hover {
+            box-shadow: 0 0 var(--card-hover-glow-intensity) var(--card-hover-glow-color);
         }
+        body.card-hover-border .card:hover { border-color: var(--accent-color); }
+        .card:hover { background: var(--card-bg-hover); }
         .card-preview-img {
-            width: 100%;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 10px;
+            width: 100%; aspect-ratio: 16/9; object-fit: cover;
+            border-radius: var(--card-preview-radius); margin-bottom: 10px;
         }
         .card h3 { margin-bottom: 8px; }
         .card p { font-size: 0.85em; opacity: 0.8; }
 
         .btn {
+            position: relative; overflow: hidden;
             padding: 12px 28px; border: none; border-radius: var(--btn-radius);
             background: linear-gradient(135deg, var(--btn-color1), var(--btn-color2));
-            color: #fff; font-size: 16px; cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.2s;
+            color: var(--btn-text-color); font-size: 16px; cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s, filter 0.15s;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            display: block; margin: 20px auto;
-            font-family: inherit;
+            display: block; margin: 20px auto; font-family: inherit;
         }
-        .btn:hover {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        body.btn-bg-image-on .btn { background-image: var(--btn-bg-image); background-size: cover; background-position: center; }
+        body.btn-scale-on-click .btn:active { transform: scale(0.92); }
+        body.btn-color-on-click .btn:active { filter: brightness(1.4); }
+        body.btn-glow-on .btn:hover {
+            box-shadow: 0 0 var(--btn-glow-intensity) var(--btn-glow-color), 0 4px 15px rgba(0,0,0,0.2);
         }
-        .btn:active { transform: scale(0.98); }
+        body.btn-text-shadow-on .btn { text-shadow: 0 1px 3px var(--btn-text-shadow-color); }
+        body.btn-shimmer-on .btn::after {
+            content: '';
+            position: absolute; top: 0; left: -100%;
+            width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmerMove 2.5s infinite;
+            pointer-events: none;
+        }
+        @keyframes shimmerMove {
+            0% { left: -60%; }
+            100% { left: 100%; }
+        }
+        .btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); }
+        body.btn-scale-on-click .btn:active { transform: scale(0.92) !important; }
         .btn-danger { background: linear-gradient(135deg, var(--btn-color-danger1), var(--btn-color-danger2)); }
         .btn-save { background: linear-gradient(135deg, var(--btn-color-save1), var(--btn-color-save2)); }
         .btn-small { padding: 6px 14px; font-size: 13px; display: inline-block; margin: 0; }
-
         .action-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
         .action-row .btn { margin: 0; width: auto; }
 
@@ -124,17 +171,13 @@
             max-height: 90vh; overflow-y: auto;
         }
         .form-box h2 { margin-bottom: 20px; }
-        .form-box input[type="text"],
-        .form-box input[type="url"],
-        .form-box textarea {
+        .form-box input[type="text"], .form-box input[type="url"], .form-box textarea {
             width: 100%; padding: 10px; margin-bottom: 12px;
             border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
             background: rgba(255,255,255,0.05); color: #fff;
             font-size: 15px; font-family: inherit;
         }
-        .form-box input[type="file"] {
-            width: 100%; margin-bottom: 12px; font-family: inherit;
-        }
+        .form-box input[type="file"] { width: 100%; margin-bottom: 12px; font-family: inherit; }
         .form-box textarea { min-height: 100px; resize: vertical; }
         .form-box label { display: block; margin-bottom: 5px; opacity: 0.8; font-size: 14px; }
         .form-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
@@ -144,7 +187,6 @@
         .description-block p:last-child { margin-bottom: 0; }
 
         .back-btn { position: fixed; top: 20px; left: 20px; z-index: 50; }
-        .loading { text-align: center; padding: 40px; opacity: 0.6; }
         .error-msg { color: #ff4d6d; text-align: center; padding: 20px; }
 
         .admin-badge {
@@ -163,11 +205,6 @@
             border: 1px solid rgba(147, 129, 255, 0.5);
             border-radius: 12px; padding: 8px 14px;
             font-size: 18px; cursor: pointer; color: #fff;
-            transition: transform 0.15s, background 0.2s;
-        }
-        .theme-btn:hover {
-            transform: scale(1.1);
-            background: rgba(147, 129, 255, 0.5);
         }
         .edit-controls { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
         .empty-state { text-align: center; padding: 40px; opacity: 0.5; }
@@ -175,17 +212,16 @@
         .image-gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
-            max-width: 600px;
-            margin: 0 auto 20px;
+            gap: var(--gallery-gap);
+            max-width: 600px; margin: 0 auto 20px;
         }
         .image-gallery img {
             width: 100%; aspect-ratio: 1; object-fit: cover;
-            border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
+            border-radius: var(--gallery-img-radius);
+            border: 1px solid rgba(255,255,255,0.15);
             cursor: pointer; transition: transform 0.2s;
         }
         .image-gallery img:hover { transform: scale(1.05); }
-
         .photos-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
         .photo-edit-item { position: relative; width: 70px; height: 70px; }
         .photo-edit-item img {
@@ -201,16 +237,16 @@
         }
         .photo-hint { font-size: 12px; opacity: 0.6; margin-bottom: 8px; }
 
-        /* === РЕДАКТОР ОФОРМЛЕНИЯ === */
+        /* РЕДАКТОР ОФОРМЛЕНИЯ */
         .theme-editor-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             display: flex; justify-content: center; align-items: center; z-index: 200;
         }
         .theme-editor {
             background: #1a1a2e; border: 1px solid rgba(255,255,255,0.2);
             border-radius: 16px; padding: 30px;
-            width: 95%; max-width: 650px; max-height: 90vh; overflow-y: auto;
+            width: 95%; max-width: 700px; max-height: 90vh; overflow-y: auto;
         }
         .theme-editor h2 { margin-bottom: 20px; }
         .theme-section {
@@ -218,52 +254,76 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .theme-section:last-child { border-bottom: none; }
-        .theme-section h3 {
-            font-size: 15px; margin-bottom: 12px; opacity: 0.9;
-        }
+        .theme-section h3 { font-size: 15px; margin-bottom: 12px; opacity: 0.9; }
         .theme-control { margin-bottom: 12px; }
-        .theme-control label {
-            display: block; margin-bottom: 4px; font-size: 13px; opacity: 0.7;
-        }
+        .theme-control label { display: block; margin-bottom: 4px; font-size: 13px; opacity: 0.7; }
         .theme-control input[type="color"] {
             width: 50px; height: 36px; border: 1px solid rgba(255,255,255,0.2);
             border-radius: 8px; background: none; cursor: pointer; vertical-align: middle;
         }
-        .theme-control input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
-        .theme-control input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }
-        .theme-control input[type="range"] {
-            width: 200px; vertical-align: middle;
-        }
+        .theme-control input[type="range"] { width: 200px; vertical-align: middle; }
         .theme-control select {
             padding: 8px 12px; border: 1px solid rgba(255,255,255,0.2);
             border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff;
             font-size: 14px; font-family: inherit;
         }
-        .theme-control .color-row {
-            display: flex; align-items: center; gap: 10px;
+        .theme-control input[type="text"] {
+            width: 100%; padding: 8px; border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff;
+            font-size: 14px; font-family: inherit;
         }
-        .theme-control .color-row span {
-            font-size: 12px; opacity: 0.6; font-family: monospace;
+        .color-row { display: flex; align-items: center; gap: 10px; }
+        .color-row span { font-size: 12px; opacity: 0.6; font-family: monospace; }
+        .color-wheel-btn {
+            padding: 4px 10px; border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px; background: rgba(255,255,255,0.05);
+            color: #fff; cursor: pointer; font-size: 14px;
         }
-        .theme-radio-group {
-            display: flex; gap: 10px; margin-bottom: 12px;
-        }
+        .color-wheel-btn:hover { background: rgba(255,255,255,0.12); }
+        .theme-radio-group { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
         .theme-radio-group label {
             display: flex; align-items: center; gap: 5px; cursor: pointer;
             padding: 8px 14px; border: 1px solid rgba(255,255,255,0.2);
             border-radius: 8px; font-size: 13px; opacity: 1;
-            transition: background 0.2s;
         }
-        .theme-radio-group label:hover { background: rgba(255,255,255,0.05); }
         .theme-radio-group input[type="radio"] { cursor: pointer; }
+        .toggle-switch {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            padding: 8px 14px; border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px; font-size: 13px; transition: background 0.2s;
+        }
+        .toggle-switch:hover { background: rgba(255,255,255,0.05); }
+        .toggle-switch input { width: 18px; height: 18px; cursor: pointer; }
         .theme-bg-image-preview {
             max-width: 200px; max-height: 120px; border-radius: 8px;
             margin-top: 8px; border: 1px solid rgba(255,255,255,0.2);
         }
-        .theme-actions {
-            display: flex; gap: 10px; justify-content: center; margin-top: 20px;
+        .theme-actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+
+        /* ЦВЕТОВОЕ КОЛЕСО */
+        .color-wheel-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex; justify-content: center; align-items: center; z-index: 300;
         }
+        .color-wheel-box {
+            background: #1a1a2e; border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px; padding: 25px; text-align: center;
+        }
+        .color-wheel-box canvas { cursor: crosshair; border-radius: 50%; display: block; margin: 0 auto 15px; }
+        .color-wheel-box .lightness-slider { width: 220px; margin: 10px auto 15px; display: block; }
+        .color-wheel-box .hex-input {
+            width: 120px; padding: 8px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+            background: rgba(255,255,255,0.05); color: #fff; font-size: 15px;
+        }
+        .color-wheel-preview {
+            width: 100%; height: 40px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2); margin: 10px 0;
+        }
+        .color-wheel-actions { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
     </style>
+    <style id="custom-css"></style>
 </head>
 <body>
     <div id="admin-btn-container"></div>
@@ -283,111 +343,185 @@
         adminPassword: '1550155Кощь'
     };
 
-    // Тема по умолчанию
     const DEFAULT_THEME = {
         bgType: 'gradient',
-        bgColor1: '#1a1a2e',
-        bgColor2: '#16213e',
-        bgColor3: '#0f3460',
-        bgColor4: '#533483',
+        bgColor1: '#1a1a2e', bgColor2: '#16213e', bgColor3: '#0f3460', bgColor4: '#533483',
         bgSolid: '#1a1a2e',
-        bgImage: '',
-        bgImageBlend: 'overlay',
+        bgImage: '', bgImageBlend: 'overlay',
+        bgOverlayColor: '#000000', bgOverlayOpacity: 0,
+        gradientSpeed: 15,
         fontFamily: "'Segoe UI', system-ui, sans-serif",
-        fontSizeBase: 16,
-        textColor: '#ffffff',
-        cardBg: 'rgba(255, 255, 255, 0.1)',
-        cardBgHover: 'rgba(255, 255, 255, 0.15)',
-        cardBorder: 'rgba(255, 255, 255, 0.2)',
-        cardRadius: 16,
-        btnColor1: '#6a4c93',
-        btnColor2: '#9381ff',
-        btnRadius: 12,
-        btnDanger1: '#c9184a',
-        btnDanger2: '#ff4d6d',
-        btnSave1: '#2d6a4f',
-        btnSave2: '#52b78a',
-        accentColor: '#9381ff',
-        linkColor: '#9381ff'
+        fontSizeBase: 16, textColor: '#ffffff',
+        cardBg: 'rgba(255, 255, 255, 0.1)', cardBgHover: 'rgba(255, 255, 255, 0.15)',
+        cardBorder: 'rgba(255, 255, 255, 0.2)', cardRadius: 16,
+        cardPadding: 20, cardGap: 20, cardPreviewRadius: 12,
+        galleryImgRadius: 12, galleryGap: 10,
+        cardHoverEffect: 'scale',
+        cardHoverGlowColor: '#9381ff', cardHoverGlowIntensity: 20,
+        btnColor1: '#6a4c93', btnColor2: '#9381ff', btnRadius: 12,
+        btnDanger1: '#c9184a', btnDanger2: '#ff4d6d',
+        btnSave1: '#2d6a4f', btnSave2: '#52b78a',
+        btnTextColor: '#ffffff',
+        btnBgImage: '', btnBgImageEnabled: false,
+        btnScaleOnClick: true, btnColorOnClick: true,
+        btnShimmer: false, btnGlow: false,
+        btnGlowColor: '#9381ff', btnGlowIntensity: 20,
+        btnTextShadow: false, btnTextShadowColor: '#000000',
+        accentColor: '#9381ff', linkColor: '#9381ff',
+        titleFontSize: 2.0, titleFontWeight: 700,
+        titleTransform: 'none', titleSpacing: 0,
+        customCSS: '',
+        textAddParticipant: '+ Добавить участника',
+        textSave: '💾 Сохранить',
+        textAddCharacter: '+ Добавить персонажа',
+        textEdit: '✎ Изменить', textDelete: '🗑 Удалить',
+        textBack: '← Назад', textCancel: 'Отмена',
+        textLogin: 'Войти', textLogout: 'Выйти', textAdmin: '👑 Админ'
     };
 
     // УТИЛИТЫ
-    function uuid() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-    }
-    function rawUrl(path) {
-        return `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
-    }
+    function uuid() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+    function rawUrl(path) { return `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`; }
     function escapeHtml(str) {
         if (!str) return '';
-        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                  .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
     function extractPath(url) {
-        try {
-            const parts = new URL(url).pathname.split('/');
-            const idx = parts.indexOf(CONFIG.branch);
-            if (idx >= 0) return parts.slice(idx + 1).join('/');
-        } catch (e) {}
+        try { const parts = new URL(url).pathname.split('/'); const idx = parts.indexOf(CONFIG.branch); if (idx >= 0) return parts.slice(idx + 1).join('/'); } catch (e) {}
         return null;
     }
     function formatDescription(text) {
         if (!text) return '<p style="opacity:0.5">Описание не задано.</p>';
-        return text
-            .split(/\r?\n/)
-            .filter(line => line.trim() !== '')
-            .map(line => `<p>${escapeHtml(line)}</p>`)
-            .join('');
+        return text.split(/\r?\n/).filter(l => l.trim() !== '').map(l => '<p>' + escapeHtml(l) + '</p>').join('');
     }
-    function getPhotos(item) {
-        if (item.photos) return item.photos;
-        if (item.photo) return [item.photo];
-        return [];
-    }
+    function getPhotos(item) { if (item.photos) return item.photos; if (item.photo) return [item.photo]; return []; }
     function renderGallery(photos) {
         if (!photos || photos.length === 0) return '';
-        return '<div class="image-gallery">' +
-            photos.map(function(url) {
-                return '<img src="' + escapeHtml(url) + '" alt="Фото" ' +
-                    'onclick="window.open(\'' + escapeHtml(url) + '\',\'_blank\')" ' +
-                    'onerror="this.style.display=\'none\'">';
-            }).join('') + '</div>';
+        return '<div class="image-gallery">' + photos.map(function(url) {
+            return '<img src="' + escapeHtml(url) + '" alt="Фото" onclick="window.open(\'' + escapeHtml(url) + '\',\'_blank\')" onerror="this.style.display=\'none\'">';
+        }).join('') + '</div>';
     }
+    function t(key) { return (currentTheme && currentTheme[key]) || DEFAULT_THEME[key] || ''; }
+
+    // HSL преобразования для цветового колеса
+    function hslToRgb(h, s, l) {
+        h /= 360; s /= 100; l /= 100;
+        let r, g, b;
+        if (s === 0) { r = g = b = l; }
+        else {
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1; if (t > 1) t -= 1;
+                if (t < 1/6) return p + (q - p) * 6 * t;
+                if (t < 1/2) return q;
+                if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            };
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1/3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1/3);
+        }
+        return [Math.round(r*255), Math.round(g*255), Math.round(b*255)];
+    }
+    function rgbToHsl(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+        if (max === min) { h = s = 0; }
+        else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+        return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+    }
+    function hexToRgb(hex) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+        return [parseInt(hex.slice(0,2), 16), parseInt(hex.slice(2,4), 16), parseInt(hex.slice(4,6), 16)];
+    }
+    function rgbToHex(r, g, b) { return '#' + [r, g, b].map(x => Math.max(0, Math.min(255, x)).toString(16).padStart(2, '0')).join(''); }
 
     // ПРИМЕНЕНИЕ ТЕМЫ
     let currentTheme = null;
 
     function applyTheme(theme) {
         const r = document.documentElement.style;
-        r.setProperty('--bg-type', theme.bgType || 'gradient');
-        r.setProperty('--bg-color1', theme.bgColor1 || '#1a1a2e');
-        r.setProperty('--bg-color2', theme.bgColor2 || '#16213e');
-        r.setProperty('--bg-color3', theme.bgColor3 || '#0f3460');
-        r.setProperty('--bg-color4', theme.bgColor4 || '#533483');
-        r.setProperty('--bg-solid', theme.bgSolid || '#1a1a2e');
-        r.setProperty('--bg-image', theme.bgImage ? `url("${theme.bgImage}")` : 'none');
-        r.setProperty('--bg-image-blend', theme.bgImageBlend || 'overlay');
-        r.setProperty('--font-family', theme.fontFamily || "'Segoe UI', system-ui, sans-serif");
-        r.setProperty('--font-size-base', (theme.fontSizeBase || 16) + 'px');
-        r.setProperty('--text-color', theme.textColor || '#ffffff');
-        r.setProperty('--card-bg', theme.cardBg || 'rgba(255, 255, 255, 0.1)');
-        r.setProperty('--card-bg-hover', theme.cardBgHover || 'rgba(255, 255, 255, 0.15)');
-        r.setProperty('--card-border', theme.cardBorder || 'rgba(255, 255, 255, 0.2)');
-        r.setProperty('--card-radius', (theme.cardRadius || 16) + 'px');
-        r.setProperty('--btn-color1', theme.btnColor1 || '#6a4c93');
-        r.setProperty('--btn-color2', theme.btnColor2 || '#9381ff');
-        r.setProperty('--btn-radius', (theme.btnRadius || 12) + 'px');
-        r.setProperty('--btn-color-danger1', theme.btnDanger1 || '#c9184a');
-        r.setProperty('--btn-color-danger2', theme.btnDanger2 || '#ff4d6d');
-        r.setProperty('--btn-color-save1', theme.btnSave1 || '#2d6a4f');
-        r.setProperty('--btn-color-save2', theme.btnSave2 || '#52b78a');
-        r.setProperty('--accent-color', theme.accentColor || '#9381ff');
-        r.setProperty('--link-color', theme.linkColor || '#9381ff');
+        const d = DEFAULT_THEME;
+        const g = (k) => theme[k] !== undefined ? theme[k] : d[k];
 
-        // Класс body для типа фона
-        document.body.classList.remove('bg-gradient', 'bg-image');
-        if (theme.bgType === 'gradient') document.body.classList.add('bg-gradient');
-        else if (theme.bgType === 'image') document.body.classList.add('bg-image');
+        r.setProperty('--bg-color1', g('bgColor1'));
+        r.setProperty('--bg-color2', g('bgColor2'));
+        r.setProperty('--bg-color3', g('bgColor3'));
+        r.setProperty('--bg-color4', g('bgColor4'));
+        r.setProperty('--bg-solid', g('bgSolid'));
+        r.setProperty('--bg-image', g('bgImage') ? 'url("' + g('bgImage') + '")' : 'none');
+        r.setProperty('--bg-image-blend', g('bgImageBlend'));
+        r.setProperty('--bg-overlay-color', g('bgOverlayColor'));
+        r.setProperty('--bg-overlay-opacity', g('bgOverlayOpacity'));
+        r.setProperty('--gradient-speed', g('gradientSpeed') + 's');
+        r.setProperty('--font-family', g('fontFamily'));
+        r.setProperty('--font-size-base', g('fontSizeBase') + 'px');
+        r.setProperty('--text-color', g('textColor'));
+        r.setProperty('--card-bg', g('cardBg'));
+        r.setProperty('--card-bg-hover', g('cardBgHover'));
+        r.setProperty('--card-border', g('cardBorder'));
+        r.setProperty('--card-radius', g('cardRadius') + 'px');
+        r.setProperty('--card-padding', g('cardPadding') + 'px');
+        r.setProperty('--card-gap', g('cardGap') + 'px');
+        r.setProperty('--card-preview-radius', g('cardPreviewRadius') + 'px');
+        r.setProperty('--gallery-img-radius', g('galleryImgRadius') + 'px');
+        r.setProperty('--gallery-gap', g('galleryGap') + 'px');
+        r.setProperty('--btn-color1', g('btnColor1'));
+        r.setProperty('--btn-color2', g('btnColor2'));
+        r.setProperty('--btn-radius', g('btnRadius') + 'px');
+        r.setProperty('--btn-color-danger1', g('btnDanger1'));
+        r.setProperty('--btn-color-danger2', g('btnDanger2'));
+        r.setProperty('--btn-color-save1', g('btnSave1'));
+        r.setProperty('--btn-color-save2', g('btnSave2'));
+        r.setProperty('--btn-text-color', g('btnTextColor'));
+        r.setProperty('--btn-bg-image', g('btnBgImage') ? 'url("' + g('btnBgImage') + '")' : 'none');
+        r.setProperty('--btn-glow-color', g('btnGlowColor'));
+        r.setProperty('--btn-glow-intensity', g('btnGlowIntensity') + 'px');
+        r.setProperty('--btn-text-shadow-color', g('btnTextShadowColor'));
+        r.setProperty('--accent-color', g('accentColor'));
+        r.setProperty('--link-color', g('linkColor'));
+        r.setProperty('--title-font-size', g('titleFontSize') + 'em');
+        r.setProperty('--title-font-weight', g('titleFontWeight'));
+        r.setProperty('--title-transform', g('titleTransform'));
+        r.setProperty('--title-spacing', g('titleSpacing') + 'px');
+        r.setProperty('--card-hover-glow-color', g('cardHoverGlowColor'));
+        r.setProperty('--card-hover-glow-intensity', g('cardHoverGlowIntensity') + 'px');
+
+        // Классы body
+        document.body.classList.remove('bg-gradient', 'bg-image', 'no-anim');
+        if (g('bgType') === 'gradient') {
+            document.body.classList.add('bg-gradient');
+            if (g('gradientSpeed') == 0) document.body.classList.add('no-anim');
+        } else if (g('bgType') === 'image') {
+            document.body.classList.add('bg-image');
+        }
+
+        // Toggle-классы для эффектов кнопок
+        document.body.classList.toggle('btn-scale-on-click', g('btnScaleOnClick'));
+        document.body.classList.toggle('btn-color-on-click', g('btnColorOnClick'));
+        document.body.classList.toggle('btn-shimmer-on', g('btnShimmer'));
+        document.body.classList.toggle('btn-glow-on', g('btnGlow'));
+        document.body.classList.toggle('btn-text-shadow-on', g('btnTextShadow'));
+        document.body.classList.toggle('btn-bg-image-on', g('btnBgImageEnabled'));
+
+        // Классы для эффектов карточек
+        document.body.classList.remove('card-hover-scale', 'card-hover-lift', 'card-hover-glow', 'card-hover-border');
+        const che = g('cardHoverEffect');
+        if (che && che !== 'none') document.body.classList.add('card-hover-' + che);
+
+        // Кастомный CSS
+        const cssEl = document.getElementById('custom-css');
+        if (cssEl) cssEl.textContent = g('customCSS') || '';
 
         currentTheme = theme;
     }
@@ -402,271 +536,218 @@
             const headers = this.token ? { Authorization: `token ${this.token}` } : {};
             const res = await fetch(url, { headers });
             if (res.status === 404) return { participants: [] };
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || `Ошибка загрузки данных: ${res.status}`);
-            }
+            if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `Ошибка загрузки: ${res.status}`); }
             const json = await res.json();
-            const content = decodeURIComponent(escape(atob(json.content)));
-            const data = JSON.parse(content);
-            if (data.participants) {
-                for (const p of data.participants) {
-                    if (!p.photos && p.photo) p.photos = [p.photo];
-                    if (!p.photos) p.photos = [];
-                    if (p.characters) {
-                        for (const c of p.characters) {
-                            if (!c.photos && c.photo) c.photos = [c.photo];
-                            if (!c.photos) c.photos = [];
-                        }
-                    }
-                }
+            const data = JSON.parse(decodeURIComponent(escape(atob(json.content))));
+            if (data.participants) for (const p of data.participants) {
+                if (!p.photos && p.photo) p.photos = [p.photo]; if (!p.photos) p.photos = [];
+                if (p.characters) for (const c of p.characters) { if (!c.photos && c.photo) c.photos = [c.photo]; if (!c.photos) c.photos = []; }
             }
             return data;
         },
-
         async getTheme() {
             const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.themeFile}?ref=${CONFIG.branch}&t=${Date.now()}`;
             const headers = this.token ? { Authorization: `token ${this.token}` } : {};
             const res = await fetch(url, { headers });
-            if (res.status === 404) return null;
-            if (!res.ok) return null;
+            if (res.status === 404 || !res.ok) return null;
             const json = await res.json();
-            const content = decodeURIComponent(escape(atob(json.content)));
-            return JSON.parse(content);
+            return JSON.parse(decodeURIComponent(escape(atob(json.content))));
         },
-
         async saveTheme(theme) {
             if (!this.token) throw new Error('Не установлен GitHub Token.');
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(theme, null, 2))));
-            const curRes = await fetch(
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.themeFile}?ref=${CONFIG.branch}&t=${Date.now()}`,
-                { headers: { Authorization: `token ${this.token}` } }
-            );
-            let sha = null;
-            if (curRes.ok) { const cur = await curRes.json(); sha = cur.sha; }
-            const body = { message: 'Обновление theme.json', content, branch: CONFIG.branch };
-            if (sha) body.sha = sha;
-            const res = await fetch(
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.themeFile}`,
-                {
-                    method: 'PUT',
-                    headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                }
-            );
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || `Ошибка сохранения темы (${res.status})`);
-            }
+            const curRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.themeFile}?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: { Authorization: `token ${this.token}` } });
+            let sha = null; if (curRes.ok) { const cur = await curRes.json(); sha = cur.sha; }
+            const body = { message: 'Обновление theme.json', content, branch: CONFIG.branch }; if (sha) body.sha = sha;
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.themeFile}`, { method: 'PUT', headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `Ошибка (${res.status})`); }
         },
-
         async saveData(data) {
             if (this.saving) throw new Error('Сохранение уже выполняется');
             this.saving = true;
-            if (!this.token) throw new Error('Не установлен GitHub Token. Войдите как админ.');
+            if (!this.token) throw new Error('Не установлен GitHub Token.');
             const clean = JSON.parse(JSON.stringify(data));
-            if (clean.participants) {
-                for (const p of clean.participants) {
-                    delete p.photo;
-                    if (!p.photos) p.photos = [];
-                    if (p.characters) {
-                        for (const c of p.characters) {
-                            delete c.photo;
-                            if (!c.photos) c.photos = [];
-                        }
-                    }
-                }
-            }
+            if (clean.participants) for (const p of clean.participants) { delete p.photo; if (!p.photos) p.photos = []; if (p.characters) for (const c of p.characters) { delete c.photo; if (!c.photos) c.photos = []; } }
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(clean, null, 2))));
-            const curRes = await fetch(
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}&t=${Date.now()}`,
-                { headers: { Authorization: `token ${this.token}` } }
-            );
-            let sha = null;
-            if (curRes.ok) { const cur = await curRes.json(); sha = cur.sha; }
-            const body = { message: 'Обновление data.json', content, branch: CONFIG.branch };
-            if (sha) body.sha = sha;
-            const res = await fetch(
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`,
-                {
-                    method: 'PUT',
-                    headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                }
-            );
+            const curRes = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}?ref=${CONFIG.branch}&t=${Date.now()}`, { headers: { Authorization: `token ${this.token}` } });
+            let sha = null; if (curRes.ok) { const cur = await curRes.json(); sha = cur.sha; }
+            const body = { message: 'Обновление data.json', content, branch: CONFIG.branch }; if (sha) body.sha = sha;
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.dataFile}`, { method: 'PUT', headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
             this.saving = false;
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || `Ошибка сохранения (${res.status})`);
-            }
+            if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `Ошибка (${res.status})`); }
         },
-
         async uploadImage(file) {
             const ext = file.name.split('.').pop().toLowerCase();
-            if (!['jpg','jpeg','png','gif','webp'].includes(ext)) {
-                throw new Error('Неподдерживаемый формат файла');
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                throw new Error('Файл слишком большой (максимум 5 МБ)');
-            }
+            if (!['jpg','jpeg','png','gif','webp'].includes(ext)) throw new Error('Неподдерживаемый формат');
+            if (file.size > 5 * 1024 * 1024) throw new Error('Файл больше 5 МБ');
             const filename = `uploads/img-${uuid()}.${ext}`;
             const base64 = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = () => {
-                    const parts = reader.result.split(',');
-                    if (parts.length !== 2) { reject(new Error('Некорректный формат данных файла')); return; }
-                    resolve(parts[1]);
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
+                reader.onload = () => { const p = reader.result.split(','); if (p.length !== 2) { reject(new Error('Ошибка чтения')); return; } resolve(p[1]); };
+                reader.onerror = reject; reader.readAsDataURL(file);
             });
-            const res = await fetch(
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${filename}`,
-                {
-                    method: 'PUT',
-                    headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: 'Загрузка изображения', content: base64, branch: CONFIG.branch })
-                }
-            );
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({}));
-                throw new Error('Не удалось загрузить изображение: ' + (err.message || res.status));
-            }
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${filename}`, {
+                method: 'PUT', headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Загрузка', content: base64, branch: CONFIG.branch })
+            });
+            if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error('Ошибка: ' + (err.message || res.status)); }
             return rawUrl(filename);
         },
-
         async deleteFile(path) {
             if (!path) return;
-            const res = await fetch(
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}`,
-                { headers: { Authorization: `token ${this.token}` } }
-            );
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}?ref=${CONFIG.branch}`, { headers: { Authorization: `token ${this.token}` } });
             if (!res.ok) return;
             const json = await res.json();
-            await fetch(
-                `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`,
-                {
-                    method: 'DELETE',
-                    headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: 'Удаление файла', sha: json.sha, branch: CONFIG.branch })
-                }
-            );
+            await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${path}`, {
+                method: 'DELETE', headers: { Authorization: `token ${this.token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: 'Удаление', sha: json.sha, branch: CONFIG.branch })
+            });
         }
     };
 
     // STATE
-    let state = {
-        data: null,
-        isAdmin: localStorage.getItem('isAdmin') === 'true',
-        loading: true
-    };
+    let state = { data: null, isAdmin: localStorage.getItem('isAdmin') === 'true' };
 
     // Фоторедактор
-    let editingPhotos = [];
-    let removedPhotos = [];
-
-    function initPhotoEditor(existingPhotos) {
-        editingPhotos = (existingPhotos || []).slice();
-        removedPhotos = [];
-    }
+    let editingPhotos = [], removedPhotos = [];
+    function initPhotoEditor(existing) { editingPhotos = (existing || []).slice(); removedPhotos = []; }
     function renderPhotoEditor(containerId) {
-        const c = document.getElementById(containerId);
-        if (!c) return;
-        if (editingPhotos.length === 0) {
-            c.innerHTML = '<p class="photo-hint">Изображений пока нет</p>';
-            return;
-        }
+        const c = document.getElementById(containerId); if (!c) return;
+        if (!editingPhotos.length) { c.innerHTML = '<p class="photo-hint">Изображений пока нет</p>'; return; }
         c.innerHTML = editingPhotos.map(function(url, i) {
-            return '<div class="photo-edit-item">' +
-                '<img src="' + escapeHtml(url) + '" alt="" onerror="this.style.opacity=0.3">' +
-                '<button type="button" class="photo-remove-btn" onclick="removePhotoAt(' + i + ')">&#10005;</button>' +
-                '</div>';
+            return '<div class="photo-edit-item"><img src="' + escapeHtml(url) + '" alt="" onerror="this.style.opacity=0.3"><button type="button" class="photo-remove-btn" onclick="removePhotoAt(' + i + ')">&#10005;</button></div>';
         }).join('');
     }
-    function removePhotoAt(index) {
-        const removed = editingPhotos.splice(index, 1)[0];
-        if (removed) removedPhotos.push(removed);
-        renderPhotoEditor('photos-preview');
-    }
+    function removePhotoAt(index) { const removed = editingPhotos.splice(index, 1)[0]; if (removed) removedPhotos.push(removed); renderPhotoEditor('photos-preview'); }
     async function addPhotosFromInput(inputId) {
-        const input = document.getElementById(inputId);
-        if (!input || !input.files.length) return;
+        const input = document.getElementById(inputId); if (!input || !input.files.length) return;
         const remaining = 6 - editingPhotos.length;
         if (remaining <= 0) { alert('Максимум 6 изображений'); input.value = ''; return; }
         const files = Array.from(input.files).slice(0, remaining);
-        showLoading('Загрузка изображений...');
-        for (const file of files) {
-            try { const url = await GH.uploadImage(file); editingPhotos.push(url); }
-            catch (e) { alert('Ошибка: ' + e.message); }
-        }
+        showLoading('Загрузка...'); for (const file of files) { try { editingPhotos.push(await GH.uploadImage(file)); } catch (e) { alert('Ошибка: ' + e.message); } }
         closeLoading(); input.value = ''; renderPhotoEditor('photos-preview');
     }
-    async function cleanupRemovedPhotos() {
-        for (const url of removedPhotos) {
-            try { await GH.deleteFile(extractPath(url)); } catch (e) {}
-        }
-        removedPhotos = [];
-    }
+    async function cleanupRemovedPhotos() { for (const url of removedPhotos) { try { await GH.deleteFile(extractPath(url)); } catch (e) {} } removedPhotos = []; }
 
     // КНОПКИ АДМИНА
     function renderAdminBtn() {
-        const container = document.getElementById('admin-btn-container');
-        if (state.isAdmin) {
-            container.innerHTML = '<div class="admin-badge">&#128081; Админ <button onclick="logout()">Выйти</button></div>';
-        } else {
-            container.innerHTML = '<div class="admin-badge"><button onclick="loginAdmin()">Войти</button></div>';
-        }
+        const c = document.getElementById('admin-btn-container');
+        c.innerHTML = state.isAdmin
+            ? '<div class="admin-badge">' + t('textAdmin') + ' <button onclick="logout()">' + t('textLogout') + '</button></div>'
+            : '<div class="admin-badge"><button onclick="loginAdmin()">' + t('textLogin') + '</button></div>';
         renderThemeBtn();
     }
     function renderThemeBtn() {
-        const container = document.getElementById('theme-btn-container');
-        if (state.isAdmin) {
-            container.innerHTML = '<button class="theme-btn" onclick="openThemeEditor()" title="Редактировать оформление">\uD83D\uDCDD</button>';
-        } else {
-            container.innerHTML = '';
-        }
+        document.getElementById('theme-btn-container').innerHTML = state.isAdmin
+            ? '<button class="theme-btn" onclick="openThemeEditor()" title="Редактировать оформление">\uD83D\uDCDD</button>'
+            : '';
     }
 
-    // АДМИН: ВХОД / ВЫХОД
+    // ВХОД / ВЫХОД
     async function loginAdmin() {
-        const password = prompt('Введите пароль для редактирования:');
-        if (password === null) return false;
-        if (password !== CONFIG.adminPassword) { alert('Неверный пароль'); return false; }
+        const pw = prompt('Введите пароль:'); if (pw === null) return false;
+        if (pw !== CONFIG.adminPassword) { alert('Неверный пароль'); return false; }
         let token = localStorage.getItem('gh_token');
-        if (!token) {
-            token = prompt('Введите ваш GitHub Personal Access Token\n(нужны права repo):');
-            if (!token || !token.trim()) return false;
-            localStorage.setItem('gh_token', token.trim());
-        }
-        GH.token = token.trim();
-        state.isAdmin = true;
-        localStorage.setItem('isAdmin', 'true');
-        renderAdminBtn();
-        route();
-        return true;
+        if (!token) { token = prompt('GitHub Token (нужны права repo):'); if (!token || !token.trim()) return false; localStorage.setItem('gh_token', token.trim()); }
+        GH.token = token.trim(); state.isAdmin = true; localStorage.setItem('isAdmin', 'true');
+        renderAdminBtn(); route(); return true;
     }
-    function logout() {
-        state.isAdmin = false;
-        localStorage.removeItem('isAdmin');
-        localStorage.removeItem('gh_token');
-        GH.token = '';
-        renderAdminBtn();
-        route();
-    }
-    async function checkAdminAccess() {
-        if (state.isAdmin) return true;
-        return await loginAdmin();
-    }
+    function logout() { state.isAdmin = false; localStorage.removeItem('isAdmin'); localStorage.removeItem('gh_token'); GH.token = ''; renderAdminBtn(); route(); }
+    async function checkAdminAccess() { if (state.isAdmin) return true; return await loginAdmin(); }
 
-    // РУЧНОЕ СОХРАНЕНИЕ
     async function manualSave() {
         if (!(await checkAdminAccess())) return;
-        if (!state.data) { alert('Нет данных для сохранения'); return; }
-        if (GH.saving) { alert('Сохранение уже выполняется, подождите...'); return; }
-        showLoading('Сохранение на GitHub...');
-        try { await GH.saveData(state.data); closeLoading(); alert('Изменения сохранены!'); }
-        catch (e) { closeLoading(); alert('Ошибка сохранения: ' + e.message); }
+        if (!state.data) { alert('Нет данных'); return; }
+        if (GH.saving) { alert('Сохранение уже выполняется...'); return; }
+        showLoading('Сохранение...'); try { await GH.saveData(state.data); closeLoading(); alert('Сохранено!'); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); }
     }
+
+    // ================================================================
+    // ЦВЕТОВОЕ КОЛЕСО
+    // ================================================================
+    let cwTarget = null, cwHue = 0, cwSat = 100, cwLight = 50;
+
+    function openColorWheel(targetKey, title) {
+        cwTarget = targetKey;
+        const currentHex = (themeEditorState[targetKey] || '#ffffff');
+        const [r, g, b] = hexToRgb(currentHex);
+        const hsl = rgbToHsl(r, g, b);
+        cwHue = hsl[0]; cwSat = hsl[1]; cwLight = hsl[2];
+
+        const old = document.getElementById('cw-overlay'); if (old) old.remove();
+        const overlay = document.createElement('div');
+        overlay.className = 'color-wheel-overlay'; overlay.id = 'cw-overlay';
+        overlay.innerHTML = '<div class="color-wheel-box">' +
+            '<h3>' + (title || 'Выбор цвета') + '</h3>' +
+            '<canvas id="cw-canvas" width="220" height="220"></canvas>' +
+            '<input type="range" class="lightness-slider" id="cw-lightness" min="0" max="100" value="' + cwLight + '" onchange="cwLightChanged(parseInt(this.value))" oninput="cwLightChanged(parseInt(this.value))">' +
+            '<div class="color-wheel-preview" id="cw-preview"></div>' +
+            '<input type="text" class="hex-input" id="cw-hex" value="' + currentHex + '" onchange="cwHexChanged(this.value)">' +
+            '<div class="color-wheel-actions">' +
+            '<button class="btn btn-small" onclick="cwApply()">Применить</button>' +
+            '<button class="btn btn-small btn-danger" onclick="cwClose()">Закрыть</button>' +
+            '</div></div>';
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', e => { if (e.target === overlay) cwClose(); });
+        drawColorWheel();
+        updateCWPreview();
+        const canvas = document.getElementById('cw-canvas');
+        canvas.addEventListener('click', cwCanvasClicked);
+    }
+    function drawColorWheel() {
+        const canvas = document.getElementById('cw-canvas'); if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const radius = canvas.width / 2;
+        const imageData = ctx.createImageData(canvas.width, canvas.height);
+        for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+                const dx = x - radius, dy = y - radius;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist > radius) continue;
+                const angle = Math.atan2(dy, dx);
+                const hue = (angle * 180 / Math.PI + 360) % 360;
+                const sat = Math.min(dist / radius, 1) * 100;
+                const [r, g, b] = hslToRgb(hue, sat, cwLight);
+                const idx = (y * canvas.width + x) * 4;
+                imageData.data[idx] = r; imageData.data[idx+1] = g; imageData.data[idx+2] = b; imageData.data[idx+3] = 255;
+            }
+        }
+        ctx.putImageData(imageData, 0, 0);
+    }
+    function cwCanvasClicked(e) {
+        const canvas = document.getElementById('cw-canvas');
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left, y = e.clientY - rect.top;
+        const radius = canvas.width / 2;
+        const dx = x - radius, dy = y - radius;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist > radius) return;
+        cwHue = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+        cwSat = Math.min(dist / radius, 1) * 100;
+        updateCWPreview();
+    }
+    function cwLightChanged(val) { cwLight = val; drawColorWheel(); updateCWPreview(); }
+    function updateCWPreview() {
+        const [r, g, b] = hslToRgb(cwHue, cwSat, cwLight);
+        const hex = rgbToHex(r, g, b);
+        const preview = document.getElementById('cw-preview'); if (preview) preview.style.background = hex;
+        const hexInput = document.getElementById('cw-hex'); if (hexInput) hexInput.value = hex;
+    }
+    function cwHexChanged(hex) {
+        if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+        const [r, g, b] = hexToRgb(hex);
+        const hsl = rgbToHsl(r, g, b);
+        cwHue = hsl[0]; cwSat = hsl[1]; cwLight = hsl[2];
+        drawColorWheel(); updateCWPreview();
+    }
+    function cwApply() {
+        const [r, g, b] = hslToRgb(cwHue, cwSat, cwLight);
+        const hex = rgbToHex(r, g, b);
+        themeUpdate(cwTarget, hex);
+        cwClose();
+        renderThemeEditor();
+    }
+    function cwClose() { const o = document.getElementById('cw-overlay'); if (o) o.remove(); }
 
     // ================================================================
     // РЕДАКТОР ОФОРМЛЕНИЯ
@@ -678,340 +759,328 @@
         renderThemeEditor();
     }
 
+    function colorControl(key, label, extraBtn) {
+        const val = themeEditorState[key] || '#ffffff';
+        return '<div class="theme-control"><label>' + label + '</label><div class="color-row">' +
+            '<input type="color" value="' + val + '" onchange="themeUpdate(\'' + key + '\', this.value)">' +
+            '<span>' + val + '</span>' +
+            '<button class="color-wheel-btn" onclick="openColorWheel(\'' + key + '\', \'' + label + '\')">\uD83C\uDFA8</button>' +
+            '</div></div>';
+    }
+
+    function toggleControl(key, label) {
+        const checked = themeEditorState[key] ? 'checked' : '';
+        return '<label class="toggle-switch"><input type="checkbox" ' + checked + ' onchange="themeUpdate(\'' + key + '\', this.checked)"> ' + label + '</label>';
+    }
+
+    function rangeControl(key, label, min, max, step, unit) {
+        const val = themeEditorState[key];
+        return '<div class="theme-control"><label>' + label + ': ' + val + (unit || '') + '</label>' +
+            '<input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '" onchange="themeUpdate(\'' + key + '\', ' + (step < 1 ? 'parseFloat' : 'parseInt') + '(this.value))"></div>';
+    }
+
+    function textControl(key, label, placeholder) {
+        const val = themeEditorState[key] || '';
+        return '<div class="theme-control"><label>' + label + '</label>' +
+            '<input type="text" value="' + escapeHtml(val) + '" placeholder="' + (placeholder || '') + '" onchange="themeUpdate(\'' + key + '\', this.value)"></div>';
+    }
+
+    function selectControl(key, label, options) {
+        const val = themeEditorState[key];
+        let opts = ''; for (const [v, l] of options) opts += '<option value="' + v + '" ' + (val === v ? 'selected' : '') + '>' + l + '</option>';
+        return '<div class="theme-control"><label>' + label + '</label><select onchange="themeUpdate(\'' + key + '\', this.value)">' + opts + '</select></div>';
+    }
+
     function renderThemeEditor() {
         const t = themeEditorState;
-        const old = document.getElementById('theme-editor-overlay');
-        if (old) old.remove();
-
+        const old = document.getElementById('theme-editor-overlay'); if (old) old.remove();
         const overlay = document.createElement('div');
-        overlay.className = 'theme-editor-overlay';
-        overlay.id = 'theme-editor-overlay';
+        overlay.className = 'theme-editor-overlay'; overlay.id = 'theme-editor-overlay';
+        let html = '<div class="theme-editor"><h2>\uD83D\uDCDD Редактор оформления</h2>';
 
-        let html = '<div class="theme-editor">';
-        html += '<h2>\uD83D\uDCDD Редактор оформления</h2>';
-
-        // --- ФОН ---
+        // ФОН
         html += '<div class="theme-section"><h3>Фон</h3>';
         html += '<div class="theme-radio-group">';
-        html += '<label><input type="radio" name="bg-type" value="gradient" ' + (t.bgType === 'gradient' ? 'checked' : '') + ' onchange="themeBgTypeChanged(\'gradient\')"> Градиент</label>';
-        html += '<label><input type="radio" name="bg-type" value="solid" ' + (t.bgType === 'solid' ? 'checked' : '') + ' onchange="themeBgTypeChanged(\'solid\')"> Однотонный</label>';
-        html += '<label><input type="radio" name="bg-type" value="image" ' + (t.bgType === 'image' ? 'checked' : '') + ' onchange="themeBgTypeChanged(\'image\')"> Картинка</label>';
-        html += '</div>';
-
-        // Градиент
-        if (t.bgType === 'gradient') {
-            html += '<div class="theme-control"><label>Цвет 1</label><div class="color-row">';
-            html += '<input type="color" value="' + t.bgColor1 + '" onchange="themeUpdate(\'bgColor1\', this.value)">';
-            html += '<span>' + t.bgColor1 + '</span></div></div>';
-            html += '<div class="theme-control"><label>Цвет 2</label><div class="color-row">';
-            html += '<input type="color" value="' + t.bgColor2 + '" onchange="themeUpdate(\'bgColor2\', this.value)">';
-            html += '<span>' + t.bgColor2 + '</span></div></div>';
-            html += '<div class="theme-control"><label>Цвет 3</label><div class="color-row">';
-            html += '<input type="color" value="' + t.bgColor3 + '" onchange="themeUpdate(\'bgColor3\', this.value)">';
-            html += '<span>' + t.bgColor3 + '</span></div></div>';
-            html += '<div class="theme-control"><label>Цвет 4</label><div class="color-row">';
-            html += '<input type="color" value="' + t.bgColor4 + '" onchange="themeUpdate(\'bgColor4\', this.value)">';
-            html += '<span>' + t.bgColor4 + '</span></div></div>';
-        }
-
-        // Однотонный
-        if (t.bgType === 'solid') {
-            html += '<div class="theme-control"><label>Цвет фона</label><div class="color-row">';
-            html += '<input type="color" value="' + t.bgSolid + '" onchange="themeUpdate(\'bgSolid\', this.value)">';
-            html += '<span>' + t.bgSolid + '</span></div></div>';
-        }
-
-        // Картинка
-        if (t.bgType === 'image') {
-            html += '<div class="theme-control"><label>URL картинки фона</label>';
-            html += '<input type="text" value="' + escapeHtml(t.bgImage || '') + '" placeholder="https://..." onchange="themeUpdate(\'bgImage\', this.value)">';
-            html += '<input type="file" accept="image/*" onchange="themeUploadBg(this)">';
-            html += '<label>Цвет подложки (виден при полупрозрачной картинке)</label><div class="color-row">';
-            html += '<input type="color" value="' + t.bgSolid + '" onchange="themeUpdate(\'bgSolid\', this.value)">';
-            html += '<span>' + t.bgSolid + '</span></div></div>';
-            html += '<div class="theme-control"><label>Режим наложения</label>';
-            html += '<select onchange="themeUpdate(\'bgImageBlend\', this.value)">';
-            ['overlay','normal','multiply','screen','darken','lighten','color-dodge','soft-light','hard-light','difference','exclusion'].forEach(m => {
-                html += '<option value="' + m + '" ' + (t.bgImageBlend === m ? 'selected' : '') + '>' + m + '</option>';
-            });
-            html += '</select></div>';
-            if (t.bgImage) {
-                html += '<img class="theme-bg-image-preview" src="' + escapeHtml(t.bgImage) + '" onerror="this.style.display=\'none\'">';
-            }
-        }
-        html += '</div>';
-
-        // --- ШРИФТ ---
-        html += '<div class="theme-section"><h3>Шрифт</h3>';
-        html += '<div class="theme-control"><label>Семейство шрифта</label>';
-        html += '<select onchange="themeUpdate(\'fontFamily\', this.value)">';
-        const fonts = [
-            ["'Segoe UI', system-ui, sans-serif", "Segoe UI (по умолчанию)"],
-            ["'Arial', sans-serif", "Arial"],
-            ["'Helvetica Neue', Helvetica, sans-serif", "Helvetica"],
-            ["'Georgia', serif", "Georgia (с засечками)"],
-            ["'Times New Roman', Times, serif", "Times New Roman"],
-            ["'Courier New', Courier, monospace", "Courier New (моноширинный)"],
-            ["'Trebuchet MS', sans-serif", "Trebuchet MS"],
-            ["'Verdana', sans-serif", "Verdana"],
-            ["'Tahoma', sans-serif", "Tahoma"],
-            ["'Roboto', sans-serif", "Roboto"],
-            ["'Montserrat', sans-serif", "Montserrat"],
-            ["'Comic Sans MS', cursive", "Comic Sans"],
-            ["'Impact', sans-serif", "Impact"]
-        ];
-        fonts.forEach(f => {
-            html += '<option value="' + f[0] + '" ' + (t.fontFamily === f[0] ? 'selected' : '') + '>' + f[1] + '</option>';
+        [['gradient','Градиент'],['solid','Однотонный'],['image','Картинка']].forEach(([v, l]) => {
+            html += '<label><input type="radio" name="bg-type" value="' + v + '" ' + (t.bgType === v ? 'checked' : '') + ' onchange="themeBgTypeChanged(\'' + v + '\')"> ' + l + '</label>';
         });
-        html += '</select></div>';
-        html += '<div class="theme-control"><label>Размер шрифта: ' + t.fontSizeBase + 'px</label>';
-        html += '<input type="range" min="12" max="24" step="1" value="' + t.fontSizeBase + '" onchange="themeUpdate(\'fontSizeBase\', parseInt(this.value)); document.querySelector(\'#theme-editor-overlay label\').textContent = \'Размер шрифта: \' + this.value + \'px\'"></div>';
-        html += '<div class="theme-control"><label>Цвет текста</label><div class="color-row">';
-        html += '<input type="color" value="' + t.textColor + '" onchange="themeUpdate(\'textColor\', this.value)">';
-        html += '<span>' + t.textColor + '</span></div></div>';
+        html += '</div>';
+        if (t.bgType === 'gradient') {
+            html += colorControl('bgColor1', 'Цвет 1') + colorControl('bgColor2', 'Цвет 2') + colorControl('bgColor3', 'Цвет 3') + colorControl('bgColor4', 'Цвет 4');
+            html += rangeControl('gradientSpeed', 'Скорость анимации (0 — выкл.)', 0, 60, 1, 'с');
+        }
+        if (t.bgType === 'solid') { html += colorControl('bgSolid', 'Цвет фона'); }
+        if (t.bgType === 'image') {
+            html += textControl('bgImage', 'URL картинки фона');
+            html += '<div class="theme-control"><label>Или загрузите файл</label><input type="file" accept="image/*" onchange="themeUploadBg(this)"></div>';
+            html += colorControl('bgSolid', 'Цвет подложки');
+            html += selectControl('bgImageBlend', 'Режим наложения', [
+                ['overlay','overlay'],['normal','normal'],['multiply','multiply'],['screen','screen'],
+                ['darken','darken'],['lighten','lighten'],['color-dodge','color-dodge'],
+                ['soft-light','soft-light'],['hard-light','hard-light'],['difference','difference'],['exclusion','exclusion']
+            ]);
+            html += colorControl('bgOverlayColor', 'Цвет затемнения');
+            html += rangeControl('bgOverlayOpacity', 'Непрозрачность затемнения', 0, 1, 0.05, '');
+            if (t.bgImage) html += '<img class="theme-bg-image-preview" src="' + escapeHtml(t.bgImage) + '" onerror="this.style.display=\'none\'">';
+        }
         html += '</div>';
 
-        // --- КАРТОЧКИ ---
+        // ШРИФТ И ТЕКСТ
+        html += '<div class="theme-section"><h3>Шрифт и текст</h3>';
+        html += selectControl('fontFamily', 'Семейство шрифта', [
+            ["'Segoe UI', system-ui, sans-serif","Segoe UI"],["'Arial', sans-serif","Arial"],
+            ["'Helvetica Neue', Helvetica, sans-serif","Helvetica"],["'Georgia', serif","Georgia"],
+            ["'Times New Roman', Times, serif","Times New Roman"],["'Courier New', Courier, monospace","Courier New"],
+            ["'Trebuchet MS', sans-serif","Trebuchet MS"],["'Verdana', sans-serif","Verdana"],
+            ["'Tahoma', sans-serif","Tahoma"],["'Roboto', sans-serif","Roboto"],
+            ["'Montserrat', sans-serif","Montserrat"],["'Comic Sans MS', cursive","Comic Sans"],
+            ["'Impact', sans-serif","Impact"]
+        ]);
+        html += rangeControl('fontSizeBase', 'Размер шрифта', 12, 24, 1, 'px');
+        html += colorControl('textColor', 'Цвет текста');
+        html += '</div>';
+
+        // ЗАГОЛОВОК
+        html += '<div class="theme-section"><h3>Заголовок h1</h3>';
+        html += rangeControl('titleFontSize', 'Размер', 1, 4, 0.1, 'em');
+        html += rangeControl('titleFontWeight', 'Жирность', 100, 900, 100, '');
+        html += selectControl('titleTransform', 'Трансформация', [['none','Обычный'],['uppercase','ВЕРХНИЙ РЕГИСТР'],['lowercase','нижний регистр'],['capitalize','С Заглавной']]);
+        html += rangeControl('titleSpacing', 'Межбуквенный интервал', -5, 20, 1, 'px');
+        html += '</div>';
+
+        // КАРТОЧКИ
         html += '<div class="theme-section"><h3>Карточки</h3>';
-        html += '<div class="theme-control"><label>Прозрачность фона карточек: ' + (parseFloat(t.cardBg.match(/[\d.]+/)[0]) * 100).toFixed(0) + '%</label>';
-        const cardOpacity = parseFloat(t.cardBg.match(/[\d.]+/)[0]);
-        html += '<input type="range" min="0" max="1" step="0.05" value="' + cardOpacity + '" onchange="themeCardOpacityChanged(parseFloat(this.value))"></div>';
-        html += '<div class="theme-control"><label>Скругление углов: ' + t.cardRadius + 'px</label>';
-        html += '<input type="range" min="0" max="30" step="1" value="' + t.cardRadius + '" onchange="themeUpdate(\'cardRadius\', parseInt(this.value))"></div>';
-        html += '<div class="theme-control"><label>Цвет рамки</label><div class="color-row">';
-        // Извлекаем цвет из rgba
-        const borderMatch = t.cardBorder.match(/rgba?$([^)]+)$/);
+        html += '<div class="theme-control"><label>Прозрачность: ' + (parseFloat((t.cardBg || '').match(/[\d.]+/)?.[0] || 0.1) * 100).toFixed(0) + '%</label>';
+        html += '<input type="range" min="0" max="1" step="0.05" value="' + (parseFloat((t.cardBg || '').match(/[\d.]+/)?.[0] || 0.1)) + '" onchange="themeCardOpacityChanged(parseFloat(this.value))"></div>';
+        html += rangeControl('cardRadius', 'Скругление углов', 0, 30, 1, 'px');
+        html += rangeControl('cardPadding', 'Внутренний отступ', 5, 40, 1, 'px');
+        html += rangeControl('cardGap', 'Расстояние между карточками', 5, 40, 1, 'px');
+        html += rangeControl('cardPreviewRadius', 'Скругление превью-картинки', 0, 20, 1, 'px');
+        const borderMatch = (t.cardBorder || '').match(/rgba?$([^)]+)$/);
         const borderRgb = borderMatch ? borderMatch[1].split(',').map(s => parseInt(s.trim())) : [255,255,255];
         const borderHex = '#' + borderRgb.slice(0,3).map(v => v.toString(16).padStart(2,'0')).join('');
         const borderAlpha = borderRgb[3] !== undefined ? borderRgb[3] : 1;
-        html += '<input type="color" value="' + borderHex + '" onchange="themeBorderColorChanged(this.value, ' + borderAlpha + ')">';
-        html += '<span>' + t.cardBorder + '</span></div></div>';
+        html += '<div class="theme-control"><label>Цвет рамки</label><div class="color-row"><input type="color" value="' + borderHex + '" onchange="themeBorderColorChanged(this.value, ' + borderAlpha + ')"><span>' + t.cardBorder + '</span><button class="color-wheel-btn" onclick="openColorWheel(\'cardBorderHex\', \'Цвет рамки\')">\uD83C\uDFA8</button></div></div>';
+        html += '<div class="theme-control"><label>Прозрачность рамки: ' + borderAlpha + '</label><input type="range" min="0" max="1" step="0.05" value="' + borderAlpha + '" onchange="themeBorderAlphaChanged(parseFloat(this.value))"></div>';
+        html += selectControl('cardHoverEffect', 'Эффект при наведении', [['none','Нет'],['scale','Увеличение'],['lift','Приподнятие'],['glow','Свечение'],['border','Подсветка рамки']]);
+        html += colorControl('cardHoverGlowColor', 'Цвет свечения карточек');
+        html += rangeControl('cardHoverGlowIntensity', 'Интенсивность свечения', 0, 50, 1, 'px');
         html += '</div>';
 
-        // --- КНОПКИ ---
-        html += '<div class="theme-section"><h3>Кнопки</h3>';
-        html += '<div class="theme-control"><label>Основной цвет 1</label><div class="color-row">';
-        html += '<input type="color" value="' + t.btnColor1 + '" onchange="themeUpdate(\'btnColor1\', this.value)">';
-        html += '<span>' + t.btnColor1 + '</span></div></div>';
-        html += '<div class="theme-control"><label>Основной цвет 2</label><div class="color-row">';
-        html += '<input type="color" value="' + t.btnColor2 + '" onchange="themeUpdate(\'btnColor2\', this.value)">';
-        html += '<span>' + t.btnColor2 + '</span></div></div>';
-        html += '<div class="theme-control"><label>Скругление углов кнопок: ' + t.btnRadius + 'px</label>';
-        html += '<input type="range" min="0" max="30" step="1" value="' + t.btnRadius + '" onchange="themeUpdate(\'btnRadius\', parseInt(this.value))"></div>';
-        html += '<div class="theme-control"><label>Цвет кнопки удаления 1</label><div class="color-row">';
-        html += '<input type="color" value="' + t.btnDanger1 + '" onchange="themeUpdate(\'btnDanger1\', this.value)">';
-        html += '<span>' + t.btnDanger1 + '</span></div></div>';
-        html += '<div class="theme-control"><label>Цвет кнопки удаления 2</label><div class="color-row">';
-        html += '<input type="color" value="' + t.btnDanger2 + '" onchange="themeUpdate(\'btnDanger2\', this.value)">';
-        html += '<span>' + t.btnDanger2 + '</span></div></div>';
-        html += '<div class="theme-control"><label>Цвет кнопки сохранения 1</label><div class="color-row">';
-        html += '<input type="color" value="' + t.btnSave1 + '" onchange="themeUpdate(\'btnSave1\', this.value)">';
-        html += '<span>' + t.btnSave1 + '</span></div></div>';
-        html += '<div class="theme-control"><label>Цвет кнопки сохранения 2</label><div class="color-row">';
-        html += '<input type="color" value="' + t.btnSave2 + '" onchange="themeUpdate(\'btnSave2\', this.value)">';
-        html += '<span>' + t.btnSave2 + '</span></div></div>';
+        // ГАЛЕРЕЯ
+        html += '<div class="theme-section"><h3>Галерея изображений</h3>';
+        html += rangeControl('galleryImgRadius', 'Скругление картинок', 0, 20, 1, 'px');
+        html += rangeControl('galleryGap', 'Расстояние между картинками', 0, 20, 1, 'px');
         html += '</div>';
 
-        // --- АКЦЕНТ ---
+        // КНОПКИ — ЦВЕТА
+        html += '<div class="theme-section"><h3>Кнопки — цвета</h3>';
+        html += colorControl('btnColor1', 'Основной цвет 1');
+        html += colorControl('btnColor2', 'Основной цвет 2');
+        html += colorControl('btnTextColor', 'Цвет текста кнопок');
+        html += colorControl('btnDanger1', 'Удаление — цвет 1');
+        html += colorControl('btnDanger2', 'Удаление — цвет 2');
+        html += colorControl('btnSave1', 'Сохранение — цвет 1');
+        html += colorControl('btnSave2', 'Сохранение — цвет 2');
+        html += rangeControl('btnRadius', 'Скругление углов', 0, 30, 1, 'px');
+        html += '</div>';
+
+        // КНОПКИ — ЭФФЕКТЫ
+        html += '<div class="theme-section"><h3>Кнопки — эффекты</h3>';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">';
+        html += toggleControl('btnScaleOnClick', 'Сжатие при нажатии');
+        html += toggleControl('btnColorOnClick', 'Яркость при нажатии');
+        html += toggleControl('btnShimmer', 'Поблёскивание');
+        html += toggleControl('btnGlow', 'Свечение при наведении');
+        html += toggleControl('btnTextShadow', 'Тень текста');
+        html += toggleControl('btnBgImageEnabled', 'Картинка на фоне кнопки');
+        html += '</div>';
+        html += '<div class="theme-control"><label>Картинка для фона кнопки</label>';
+        html += '<input type="file" accept="image/*" onchange="themeUploadBtnBg(this)">';
+        if (t.btnBgImage) html += '<img class="theme-bg-image-preview" src="' + escapeHtml(t.btnBgImage) + '" onerror="this.style.display=\'none\'">';
+        html += '</div>';
+        html += colorControl('btnGlowColor', 'Цвет свечения кнопок');
+        html += rangeControl('btnGlowIntensity', 'Интенсивность свечения', 0, 50, 1, 'px');
+        html += colorControl('btnTextShadowColor', 'Цвет тени текста');
+        html += '</div>';
+
+        // КНОПКИ — ТЕКСТЫ
+        html += '<div class="theme-section"><h3>Кнопки — тексты</h3>';
+        html += textControl('textAddParticipant', 'Кнопка «Добавить участника»');
+        html += textControl('textAddCharacter', 'Кнопка «Добавить персонажа»');
+        html += textControl('textSave', 'Кнопка «Сохранить»');
+        html += textControl('textEdit', 'Кнопка «Изменить»');
+        html += textControl('textDelete', 'Кнопка «Удалить»');
+        html += textControl('textBack', 'Кнопка «Назад»');
+        html += textControl('textCancel', 'Кнопка «Отмена»');
+        html += textControl('textLogin', 'Кнопка «Войти»');
+        html += textControl('textLogout', 'Кнопка «Выйти»');
+        html += textControl('textAdmin', 'Текст бейджа админа');
+        html += '</div>';
+
+        // АКЦЕНТ
         html += '<div class="theme-section"><h3>Акцент</h3>';
-        html += '<div class="theme-control"><label>Акцентный цвет</label><div class="color-row">';
-        html += '<input type="color" value="' + t.accentColor + '" onchange="themeUpdate(\'accentColor\', this.value); themeUpdate(\'linkColor\', this.value)">';
-        html += '<span>' + t.accentColor + '</span></div></div>';
+        html += colorControl('accentColor', 'Акцентный цвет');
         html += '</div>';
 
-        // --- КНОПКИ ДЕЙСТВИЙ ---
+        // КАСТОМНЫЙ CSS
+        html += '<div class="theme-section"><h3>Свой CSS (расширенное)</h3>';
+        html += '<div class="theme-control"><label>Любые CSS-правила, применятся поверх всех настроек</label>';
+        html += '<textarea style="width:100%;min-height:120px;padding:10px;border:1px solid rgba(255,255,255,0.2);border-radius:8px;background:rgba(255,255,255,0.05);color:#fff;font-family:monospace;font-size:13px;resize:vertical" placeholder="body { ... }" onchange="themeUpdate(\'customCSS\', this.value)">' + escapeHtml(t.customCSS || '') + '</textarea></div>';
+        html += '</div>';
+
+        // ДЕЙСТВИЯ
         html += '<div class="theme-actions">';
-        html += '<button class="btn btn-small" onclick="themeSave()">\uD83D\uDCBE Сохранить</button>';
-        html += '<button class="btn btn-small btn-danger" onclick="themeReset()">\u21BA Сбросить</button>';
+        html += '<button class="btn btn-small btn-save" onclick="themeSave()">\uD83D\uDCBE Сохранить</button>';
+        html += '<button class="btn btn-small" onclick="themeExport()">\uD83D\uDCE4 Экспорт</button>';
+        html += '<button class="btn btn-small" onclick="themeImport()">\uD83D\uDCE5 Импорт</button>';
+        html += '<button class="btn btn-small btn-danger" onclick="themeReset()">\u21BA Сброс</button>';
         html += '<button class="btn btn-small btn-danger" onclick="closeThemeEditor()">Закрыть</button>';
-        html += '</div>';
-        html += '</div>';
+        html += '</div></div>';
 
         overlay.innerHTML = html;
         document.body.appendChild(overlay);
         overlay.addEventListener('click', e => { if (e.target === overlay) closeThemeEditor(); });
-
-        // Применяем для живого превью
         applyTheme(themeEditorState);
     }
 
-    function closeThemeEditor() {
-        const o = document.getElementById('theme-editor-overlay');
-        if (o) o.remove();
-        // Возвращаем сохранённую тему
-        if (currentTheme) applyTheme(currentTheme);
-    }
-
-    function themeUpdate(key, value) {
-        themeEditorState[key] = value;
-        applyTheme(themeEditorState);
-    }
-
-    function themeBgTypeChanged(type) {
-        themeEditorState.bgType = type;
-        renderThemeEditor();
-        applyTheme(themeEditorState);
-    }
+    function closeThemeEditor() { const o = document.getElementById('theme-editor-overlay'); if (o) o.remove(); if (currentTheme) applyTheme(currentTheme); }
+    function themeUpdate(key, value) { themeEditorState[key] = value; applyTheme(themeEditorState); }
+    function themeBgTypeChanged(type) { themeEditorState.bgType = type; renderThemeEditor(); applyTheme(themeEditorState); }
 
     function themeCardOpacityChanged(opacity) {
         themeEditorState.cardBg = 'rgba(255, 255, 255, ' + opacity + ')';
-        themeEditorState.cardBgHover = 'rgba(255, 255, 255, ' + (opacity + 0.05) + ')';
+        themeEditorState.cardBgHover = 'rgba(255, 255, 255, ' + Math.min(opacity + 0.05, 1) + ')';
         applyTheme(themeEditorState);
-        // Обновляем подпись слайдера
-        const labels = document.querySelectorAll('#theme-editor-overlay .theme-control label');
-        if (labels[0]) labels[0].textContent = 'Прозрачность фона карточек: ' + (opacity * 100).toFixed(0) + '%';
     }
-
     function themeBorderColorChanged(hex, alpha) {
-        const r = parseInt(hex.slice(1,3), 16);
-        const g = parseInt(hex.slice(3,5), 16);
-        const b = parseInt(hex.slice(5,7), 16);
+        const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
         themeEditorState.cardBorder = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+        themeEditorState._cardBorderHex = hex;
         applyTheme(themeEditorState);
+    }
+    function themeBorderAlphaChanged(alpha) {
+        const match = (themeEditorState.cardBorder || '').match(/rgba?$([^)]+)$/);
+        const rgb = match ? match[1].split(',').map(s => parseInt(s.trim())) : [255,255,255];
+        themeEditorState.cardBorder = 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', ' + alpha + ')';
+        applyTheme(themeEditorState);
+        renderThemeEditor();
     }
 
     async function themeUploadBg(input) {
         if (!input.files[0]) return;
         showLoading('Загрузка фона...');
-        try {
-            const url = await GH.uploadImage(input.files[0]);
-            themeEditorState.bgImage = url;
-            closeLoading();
-            renderThemeEditor();
-            applyTheme(themeEditorState);
-        } catch (e) {
-            closeLoading();
-            alert('Ошибка: ' + e.message);
-        }
+        try { themeEditorState.bgImage = await GH.uploadImage(input.files[0]); closeLoading(); renderThemeEditor(); applyTheme(themeEditorState); }
+        catch (e) { closeLoading(); alert('Ошибка: ' + e.message); }
+    }
+    async function themeUploadBtnBg(input) {
+        if (!input.files[0]) return;
+        showLoading('Загрузка...');
+        try { themeEditorState.btnBgImage = await GH.uploadImage(input.files[0]); themeEditorState.btnBgImageEnabled = true; closeLoading(); renderThemeEditor(); applyTheme(themeEditorState); }
+        catch (e) { closeLoading(); alert('Ошибка: ' + e.message); }
     }
 
     async function themeSave() {
         showLoading('Сохранение оформления...');
-        try {
-            await GH.saveTheme(themeEditorState);
-            currentTheme = Object.assign({}, themeEditorState);
-            closeLoading();
-            alert('Оформление сохранено!');
-            closeThemeEditor();
-        } catch (e) {
-            closeLoading();
-            alert('Ошибка: ' + e.message);
-        }
+        try { await GH.saveTheme(themeEditorState); currentTheme = Object.assign({}, themeEditorState); closeLoading(); alert('Оформление сохранено!'); closeThemeEditor(); renderAdminBtn(); route(); }
+        catch (e) { closeLoading(); alert('Ошибка: ' + e.message); }
     }
-
     function themeReset() {
         if (!confirm('Сбросить оформление к стандартному?')) return;
         themeEditorState = Object.assign({}, DEFAULT_THEME);
-        renderThemeEditor();
-        applyTheme(themeEditorState);
+        renderThemeEditor(); applyTheme(themeEditorState);
+    }
+    function themeExport() {
+        const json = JSON.stringify(themeEditorState, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'theme-export.json'; a.click();
+    }
+    function themeImport() {
+        const input = document.createElement('input');
+        input.type = 'file'; input.accept = '.json';
+        input.onchange = function() {
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => { try { themeEditorState = Object.assign({}, DEFAULT_THEME, JSON.parse(reader.result)); renderThemeEditor(); applyTheme(themeEditorState); } catch (e) { alert('Ошибка импорта: ' + e.message); } };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 
     // ROUTER
     function route() {
         const hash = location.hash.slice(1) || '/';
         const parts = hash.split('/').filter(Boolean);
-        if (parts.length === 0) {
-            renderMain();
-        } else if (parts[0] === 'participant' && parts[1]) {
-            if (parts[2] === 'character' && parts[3]) {
-                renderCharacter(parts[1], parts[3]);
-            } else {
-                renderParticipant(parts[1]);
-            }
-        } else {
-            renderMain();
-        }
+        if (parts.length === 0) renderMain();
+        else if (parts[0] === 'participant' && parts[1]) {
+            if (parts[2] === 'character' && parts[3]) renderCharacter(parts[1], parts[3]);
+            else renderParticipant(parts[1]);
+        } else renderMain();
     }
 
     // РЕНДЕР: ГЛАВНАЯ
     async function renderMain() {
         const app = document.getElementById('app');
-        try {
-            if (!state.data) state.data = await GH.getData();
-        } catch (e) { app.innerHTML = '<div class="error-msg">Ошибка: ' + escapeHtml(e.message) + '</div>'; return; }
-
+        try { if (!state.data) state.data = await GH.getData(); } catch (e) { app.innerHTML = '<div class="error-msg">' + escapeHtml(e.message) + '</div>'; return; }
         const participants = state.data.participants || [];
         let html = '<h1>Участники</h1>';
-
-        if (participants.length === 0) {
-            html += '<div class="empty-state">Пока нет ни одного участника</div>';
-        } else {
+        if (!participants.length) { html += '<div class="empty-state">Пока нет ни одного участника</div>'; }
+        else {
             html += '<div class="cards-grid">';
             for (const p of participants) {
                 const photos = getPhotos(p);
-                const preview = photos.length > 0
-                    ? '<img class="card-preview-img" src="' + escapeHtml(photos[0]) + '" alt="' + escapeHtml(p.name) + '" onerror="this.style.display=\'none\'">'
-                    : '';
+                const preview = photos.length > 0 ? '<img class="card-preview-img" src="' + escapeHtml(photos[0]) + '" alt="' + escapeHtml(p.name) + '" onerror="this.style.display=\'none\'">' : '';
                 const desc = (p.description || '').slice(0, 80);
-                html += '<div class="card" onclick="location.hash = \'/participant/' + p.id + '\'">' +
-                    preview +
-                    '<h3>' + escapeHtml(p.name) + '</h3>' +
-                    '<p>' + escapeHtml(desc) + (p.description && p.description.length > 80 ? '\u2026' : '') + '</p>' +
+                html += '<div class="card" onclick="location.hash = \'/participant/' + p.id + '\'">' + preview +
+                    '<h3>' + escapeHtml(p.name) + '</h3><p>' + escapeHtml(desc) + (p.description && p.description.length > 80 ? '\u2026' : '') + '</p>' +
                     (state.isAdmin ? '<div class="edit-controls" onclick="event.stopPropagation()">' +
-                        '<button class="btn btn-small" onclick="editParticipant(\'' + p.id + '\')">&#9998; Изменить</button>' +
-                        '<button class="btn btn-small btn-danger" onclick="deleteParticipant(\'' + p.id + '\')">&#128465; Удалить</button>' +
-                    '</div>' : '') +
-                '</div>';
+                        '<button class="btn btn-small" onclick="editParticipant(\'' + p.id + '\')">' + t('textEdit') + '</button>' +
+                        '<button class="btn btn-small btn-danger" onclick="deleteParticipant(\'' + p.id + '\')">' + t('textDelete') + '</button></div>' : '') +
+                    '</div>';
             }
             html += '</div>';
         }
-        html += '<div class="action-row">';
-        html += '<button class="btn" onclick="addParticipant()">+ Добавить участника</button>';
-        if (state.isAdmin) html += '<button class="btn btn-save" onclick="manualSave()">\uD83D\uDCBE Сохранить</button>';
+        html += '<div class="action-row"><button class="btn" onclick="addParticipant()">' + t('textAddParticipant') + '</button>';
+        if (state.isAdmin) html += '<button class="btn btn-save" onclick="manualSave()">' + t('textSave') + '</button>';
         html += '</div>';
         app.innerHTML = html;
     }
 
-    // РЕНДЕР: СТРАНИЦА УЧАСТНИКА
+    // РЕНДЕР: УЧАСТНИК
     async function renderParticipant(id) {
         const app = document.getElementById('app');
         if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = '<div class="error-msg">' + escapeHtml(e.message) + '</div>'; return; } }
-        const participant = (state.data.participants || []).find(p => p.id === id);
-        if (!participant) { app.innerHTML = '<div class="error-msg">Участник не найден</div><button class="btn" onclick="location.hash=\'/\'">На главную</button>'; return; }
-
-        const photos = getPhotos(participant);
-        let html = '<button class="btn btn-small back-btn" onclick="location.hash=\'/\'">\u2190 Назад</button>';
-        html += '<div class="participant-header">' +
-            renderGallery(photos) +
-            '<h2>' + escapeHtml(participant.name) + '</h2>' +
-            '<div class="description-block">' + formatDescription(participant.description) + '</div>' +
-            (state.isAdmin ? '<div class="edit-controls">' +
-                '<button class="btn btn-small" onclick="editParticipant(\'' + participant.id + '\')">&#9998; Изменить</button>' +
-                '<button class="btn btn-small btn-danger" onclick="deleteParticipant(\'' + participant.id + '\')">&#128465; Удалить</button>' +
-            '</div>' : '') +
-        '</div>';
-
-        const characters = participant.characters || [];
-        if (characters.length === 0) {
-            html += '<div class="empty-state">У этого участника пока нет персонажей</div>';
-        } else {
+        const p = (state.data.participants || []).find(x => x.id === id);
+        if (!p) { app.innerHTML = '<div class="error-msg">Участник не найден</div><button class="btn" onclick="location.hash=\'/\'">На главную</button>'; return; }
+        const photos = getPhotos(p);
+        let html = '<button class="btn btn-small back-btn" onclick="location.hash=\'/\'">' + t('textBack') + '</button>';
+        html += '<div class="participant-header">' + renderGallery(photos) +
+            '<h2>' + escapeHtml(p.name) + '</h2><div class="description-block">' + formatDescription(p.description) + '</div>' +
+            (state.isAdmin ? '<div class="edit-controls"><button class="btn btn-small" onclick="editParticipant(\'' + p.id + '\')">' + t('textEdit') + '</button><button class="btn btn-small btn-danger" onclick="deleteParticipant(\'' + p.id + '\')">' + t('textDelete') + '</button></div>' : '') +
+            '</div>';
+        const characters = p.characters || [];
+        if (!characters.length) { html += '<div class="empty-state">У этого участника пока нет персонажей</div>'; }
+        else {
             html += '<div class="cards-grid">';
             for (const c of characters) {
                 const cPhotos = getPhotos(c);
-                const cPreview = cPhotos.length > 0
-                    ? '<img class="card-preview-img" src="' + escapeHtml(cPhotos[0]) + '" alt="' + escapeHtml(c.name) + '" onerror="this.style.display=\'none\'">'
-                    : '';
+                const cPreview = cPhotos.length > 0 ? '<img class="card-preview-img" src="' + escapeHtml(cPhotos[0]) + '" alt="' + escapeHtml(c.name) + '" onerror="this.style.display=\'none\'">' : '';
                 const cDesc = (c.description || '').slice(0, 80);
-                html += '<div class="card" onclick="location.hash = \'/participant/' + participant.id + '/character/' + c.id + '\'">' +
-                    cPreview +
-                    '<h3>' + escapeHtml(c.name) + '</h3>' +
-                    '<p>' + escapeHtml(cDesc) + (c.description && c.description.length > 80 ? '\u2026' : '') + '</p>' +
-                    (state.isAdmin ? '<div class="edit-controls" onclick="event.stopPropagation()">' +
-                        '<button class="btn btn-small" onclick="editCharacter(\'' + participant.id + '\',\'' + c.id + '\')">&#9998; Изменить</button>' +
-                        '<button class="btn btn-small btn-danger" onclick="deleteCharacter(\'' + participant.id + '\',\'' + c.id + '\')">&#128465; Удалить</button>' +
-                    '</div>' : '') +
-                '</div>';
+                html += '<div class="card" onclick="location.hash = \'/participant/' + p.id + '/character/' + c.id + '\'">' + cPreview +
+                    '<h3>' + escapeHtml(c.name) + '</h3><p>' + escapeHtml(cDesc) + (c.description && c.description.length > 80 ? '\u2026' : '') + '</p>' +
+                    (state.isAdmin ? '<div class="edit-controls" onclick="event.stopPropagation()"><button class="btn btn-small" onclick="editCharacter(\'' + p.id + '\',\'' + c.id + '\')">' + t('textEdit') + '</button><button class="btn btn-small btn-danger" onclick="deleteCharacter(\'' + p.id + '\',\'' + c.id + '\')">' + t('textDelete') + '</button></div>' : '') +
+                    '</div>';
             }
             html += '</div>';
         }
-        html += '<div class="action-row">';
-        html += '<button class="btn" onclick="addCharacter(\'' + participant.id + '\')">+ Добавить персонажа</button>';
-        if (state.isAdmin) html += '<button class="btn btn-save" onclick="manualSave()">\uD83D\uDCBE Сохранить</button>';
+        html += '<div class="action-row"><button class="btn" onclick="addCharacter(\'' + p.id + '\')">' + t('textAddCharacter') + '</button>';
+        if (state.isAdmin) html += '<button class="btn btn-save" onclick="manualSave()">' + t('textSave') + '</button>';
         html += '</div>';
         app.innerHTML = html;
     }
 
-    // РЕНДЕР: СТРАНИЦА ПЕРСОНАЖА
+    // РЕНДЕР: ПЕРСОНАЖ
     async function renderCharacter(pid, cid) {
         const app = document.getElementById('app');
         if (!state.data) { try { state.data = await GH.getData(); } catch (e) { app.innerHTML = '<div class="error-msg">' + escapeHtml(e.message) + '</div>'; return; } }
@@ -1019,19 +1088,13 @@
         if (!p) { app.innerHTML = '<div class="error-msg">Участник не найден</div>'; return; }
         const c = (p.characters || []).find(x => x.id === cid);
         if (!c) { app.innerHTML = '<div class="error-msg">Персонаж не найден</div>'; return; }
-
         const photos = getPhotos(c);
-        let html = '<button class="btn btn-small back-btn" onclick="location.hash=\'/participant/' + pid + '\'">\u2190 Назад</button>';
-        html += '<div class="participant-header">' +
-            renderGallery(photos) +
-            '<h2>' + escapeHtml(c.name) + '</h2>' +
-            '<div class="description-block">' + formatDescription(c.description) + '</div>' +
+        let html = '<button class="btn btn-small back-btn" onclick="location.hash=\'/participant/' + pid + '\'">' + t('textBack') + '</button>';
+        html += '<div class="participant-header">' + renderGallery(photos) +
+            '<h2>' + escapeHtml(c.name) + '</h2><div class="description-block">' + formatDescription(c.description) + '</div>' +
             '<p style="margin-top:10px;opacity:0.5;font-size:14px">Участник: ' + escapeHtml(p.name) + '</p>' +
-            (state.isAdmin ? '<div class="edit-controls">' +
-                '<button class="btn btn-small" onclick="editCharacter(\'' + pid + '\',\'' + cid + '\')">&#9998; Изменить</button>' +
-                '<button class="btn btn-small btn-danger" onclick="deleteCharacter(\'' + pid + '\',\'' + cid + '\')">&#128465; Удалить</button>' +
-            '</div>' : '') +
-        '</div>';
+            (state.isAdmin ? '<div class="edit-controls"><button class="btn btn-small" onclick="editCharacter(\'' + pid + '\',\'' + cid + '\')">' + t('textEdit') + '</button><button class="btn btn-small btn-danger" onclick="deleteCharacter(\'' + pid + '\',\'' + cid + '\')">' + t('textDelete') + '</button></div>' : '') +
+            '</div>';
         app.innerHTML = html;
     }
 
@@ -1054,23 +1117,13 @@
 
     // УЧАСТНИКИ
     async function addParticipant() {
-        if (!(await checkAdminAccess())) return;
-        initPhotoEditor([]);
-        showForm('<h2>Новый участник</h2>' +
-            '<label>Имя *</label><input type="text" id="p-name" placeholder="Имя участника">' +
-            '<label>Описание</label><textarea id="p-desc" placeholder="Краткое описание"></textarea>' +
-            '<label>Изображения (до 6 шт.)</label>' +
-            '<input type="file" id="p-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'p-photos\')">' +
-            '<div class="photos-preview" id="photos-preview"></div>' +
-            '<div class="form-row"><button class="btn" onclick="saveNewParticipant()">Сохранить</button>' +
-            '<button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>');
+        if (!(await checkAdminAccess())) return; initPhotoEditor([]);
+        showForm('<h2>Новый участник</h2><label>Имя *</label><input type="text" id="p-name" placeholder="Имя"><label>Описание</label><textarea id="p-desc"></textarea><label>Изображения (до 6)</label><input type="file" id="p-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'p-photos\')"><div class="photos-preview" id="photos-preview"></div><div class="form-row"><button class="btn" onclick="saveNewParticipant()">' + t('textSave') + '</button><button class="btn btn-danger" onclick="closeForm()">' + t('textCancel') + '</button></div>');
         renderPhotoEditor('photos-preview');
     }
     async function saveNewParticipant() {
-        const name = document.getElementById('p-name').value.trim();
-        if (!name) { alert('Введите имя'); return; }
-        const desc = document.getElementById('p-desc').value.trim();
-        closeForm(); showLoading('Сохранение...');
+        const name = document.getElementById('p-name').value.trim(); if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('p-desc').value.trim(); closeForm(); showLoading('Сохранение...');
         if (!state.data.participants) state.data.participants = [];
         state.data.participants.push({ id: uuid(), name, description: desc, photos: editingPhotos.slice(), characters: [] });
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
@@ -1078,23 +1131,13 @@
     }
     async function editParticipant(id) {
         if (!(await checkAdminAccess())) return;
-        const p = state.data.participants.find(x => x.id === id); if (!p) return;
-        initPhotoEditor(getPhotos(p));
-        showForm('<h2>Редактировать участника</h2>' +
-            '<label>Имя *</label><input type="text" id="p-name" value="' + escapeHtml(p.name) + '">' +
-            '<label>Описание</label><textarea id="p-desc">' + escapeHtml(p.description || '') + '</textarea>' +
-            '<label>Изображения (до 6 шт.)</label>' +
-            '<input type="file" id="p-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'p-photos\')">' +
-            '<div class="photos-preview" id="photos-preview"></div>' +
-            '<div class="form-row"><button class="btn" onclick="saveEditParticipant(\'' + id + '\')">Сохранить</button>' +
-            '<button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>');
+        const p = state.data.participants.find(x => x.id === id); if (!p) return; initPhotoEditor(getPhotos(p));
+        showForm('<h2>Редактировать участника</h2><label>Имя *</label><input type="text" id="p-name" value="' + escapeHtml(p.name) + '"><label>Описание</label><textarea id="p-desc">' + escapeHtml(p.description || '') + '</textarea><label>Изображения (до 6)</label><input type="file" id="p-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'p-photos\')"><div class="photos-preview" id="photos-preview"></div><div class="form-row"><button class="btn" onclick="saveEditParticipant(\'' + id + '\')">' + t('textSave') + '</button><button class="btn btn-danger" onclick="closeForm()">' + t('textCancel') + '</button></div>');
         renderPhotoEditor('photos-preview');
     }
     async function saveEditParticipant(id) {
-        const name = document.getElementById('p-name').value.trim();
-        if (!name) { alert('Введите имя'); return; }
-        const desc = document.getElementById('p-desc').value.trim();
-        closeForm(); showLoading('Сохранение...');
+        const name = document.getElementById('p-name').value.trim(); if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('p-desc').value.trim(); closeForm(); showLoading('Сохранение...');
         const p = state.data.participants.find(x => x.id === id); if (!p) { closeLoading(); return; }
         p.name = name; p.description = desc; p.photos = editingPhotos.slice();
         await cleanupRemovedPhotos();
@@ -1102,18 +1145,10 @@
         closeLoading(); route();
     }
     async function deleteParticipant(id) {
-        if (!(await checkAdminAccess())) return;
-        if (!confirm('Удалить участника и всех его персонажей?')) return;
+        if (!(await checkAdminAccess())) return; if (!confirm('Удалить участника и всех персонажей?')) return;
         showLoading('Удаление...');
         const p = state.data.participants.find(x => x.id === id);
-        if (p) {
-            const photos = getPhotos(p);
-            for (const url of photos) { try { await GH.deleteFile(extractPath(url)); } catch(e) {} }
-            if (p.characters) for (const c of p.characters) {
-                const cPhotos = getPhotos(c);
-                for (const url of cPhotos) { try { await GH.deleteFile(extractPath(url)); } catch(e) {} }
-            }
-        }
+        if (p) { for (const url of getPhotos(p)) { try { await GH.deleteFile(extractPath(url)); } catch(e){} } if (p.characters) for (const c of p.characters) for (const url of getPhotos(c)) { try { await GH.deleteFile(extractPath(url)); } catch(e){} } }
         state.data.participants = state.data.participants.filter(x => x.id !== id);
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
         closeLoading(); location.hash = '/'; renderMain();
@@ -1121,25 +1156,14 @@
 
     // ПЕРСОНАЖИ
     async function addCharacter(pid) {
-        if (!(await checkAdminAccess())) return;
-        initPhotoEditor([]);
-        showForm('<h2>Новый персонаж</h2>' +
-            '<label>Имя *</label><input type="text" id="c-name" placeholder="Имя персонажа">' +
-            '<label>Описание</label><textarea id="c-desc" placeholder="Краткое описание"></textarea>' +
-            '<label>Изображения (до 6 шт.)</label>' +
-            '<input type="file" id="c-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'c-photos\')">' +
-            '<div class="photos-preview" id="photos-preview"></div>' +
-            '<div class="form-row"><button class="btn" onclick="saveNewCharacter(\'' + pid + '\')">Сохранить</button>' +
-            '<button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>');
+        if (!(await checkAdminAccess())) return; initPhotoEditor([]);
+        showForm('<h2>Новый персонаж</h2><label>Имя *</label><input type="text" id="c-name" placeholder="Имя"><label>Описание</label><textarea id="c-desc"></textarea><label>Изображения (до 6)</label><input type="file" id="c-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'c-photos\')"><div class="photos-preview" id="photos-preview"></div><div class="form-row"><button class="btn" onclick="saveNewCharacter(\'' + pid + '\')">' + t('textSave') + '</button><button class="btn btn-danger" onclick="closeForm()">' + t('textCancel') + '</button></div>');
         renderPhotoEditor('photos-preview');
     }
     async function saveNewCharacter(pid) {
-        const name = document.getElementById('c-name').value.trim();
-        if (!name) { alert('Введите имя'); return; }
-        const desc = document.getElementById('c-desc').value.trim();
-        closeForm(); showLoading('Сохранение...');
-        const p = state.data.participants.find(x => x.id === pid);
-        if (!p.characters) p.characters = [];
+        const name = document.getElementById('c-name').value.trim(); if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('c-desc').value.trim(); closeForm(); showLoading('Сохранение...');
+        const p = state.data.participants.find(x => x.id === pid); if (!p.characters) p.characters = [];
         p.characters.push({ id: uuid(), name, description: desc, photos: editingPhotos.slice() });
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
         closeLoading(); renderParticipant(pid);
@@ -1147,23 +1171,13 @@
     async function editCharacter(pid, cid) {
         if (!(await checkAdminAccess())) return;
         const p = state.data.participants.find(x => x.id === pid); if (!p) return;
-        const c = (p.characters || []).find(x => x.id === cid); if (!c) return;
-        initPhotoEditor(getPhotos(c));
-        showForm('<h2>Редактировать персонажа</h2>' +
-            '<label>Имя *</label><input type="text" id="c-name" value="' + escapeHtml(c.name) + '">' +
-            '<label>Описание</label><textarea id="c-desc">' + escapeHtml(c.description || '') + '</textarea>' +
-            '<label>Изображения (до 6 шт.)</label>' +
-            '<input type="file" id="c-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'c-photos\')">' +
-            '<div class="photos-preview" id="photos-preview"></div>' +
-            '<div class="form-row"><button class="btn" onclick="saveEditCharacter(\'' + pid + '\',\'' + cid + '\')">Сохранить</button>' +
-            '<button class="btn btn-danger" onclick="closeForm()">Отмена</button></div>');
+        const c = (p.characters || []).find(x => x.id === cid); if (!c) return; initPhotoEditor(getPhotos(c));
+        showForm('<h2>Редактировать персонажа</h2><label>Имя *</label><input type="text" id="c-name" value="' + escapeHtml(c.name) + '"><label>Описание</label><textarea id="c-desc">' + escapeHtml(c.description || '') + '</textarea><label>Изображения (до 6)</label><input type="file" id="c-photos" accept="image/*" multiple onchange="addPhotosFromInput(\'c-photos\')"><div class="photos-preview" id="photos-preview"></div><div class="form-row"><button class="btn" onclick="saveEditCharacter(\'' + pid + '\',\'' + cid + '\')">' + t('textSave') + '</button><button class="btn btn-danger" onclick="closeForm()">' + t('textCancel') + '</button></div>');
         renderPhotoEditor('photos-preview');
     }
     async function saveEditCharacter(pid, cid) {
-        const name = document.getElementById('c-name').value.trim();
-        if (!name) { alert('Введите имя'); return; }
-        const desc = document.getElementById('c-desc').value.trim();
-        closeForm(); showLoading('Сохранение...');
+        const name = document.getElementById('c-name').value.trim(); if (!name) { alert('Введите имя'); return; }
+        const desc = document.getElementById('c-desc').value.trim(); closeForm(); showLoading('Сохранение...');
         const p = state.data.participants.find(x => x.id === pid); if (!p) { closeLoading(); return; }
         const c = (p.characters || []).find(x => x.id === cid); if (!c) { closeLoading(); return; }
         c.name = name; c.description = desc; c.photos = editingPhotos.slice();
@@ -1172,16 +1186,12 @@
         closeLoading(); route();
     }
     async function deleteCharacter(pid, cid) {
-        if (!(await checkAdminAccess())) return;
-        if (!confirm('Удалить персонажа?')) return;
+        if (!(await checkAdminAccess())) return; if (!confirm('Удалить персонажа?')) return;
         showLoading('Удаление...');
         const p = state.data.participants.find(x => x.id === pid);
         if (p && p.characters) {
             const c = p.characters.find(x => x.id === cid);
-            if (c) {
-                const cPhotos = getPhotos(c);
-                for (const url of cPhotos) { try { await GH.deleteFile(extractPath(url)); } catch(e) {} }
-            }
+            if (c) for (const url of getPhotos(c)) { try { await GH.deleteFile(extractPath(url)); } catch(e){} }
             p.characters = p.characters.filter(x => x.id !== cid);
         }
         try { await GH.saveData(state.data); } catch (e) { closeLoading(); alert('Ошибка: ' + e.message); return; }
@@ -1190,22 +1200,12 @@
 
     // ИНИЦИАЛИЗАЦИЯ
     async function init() {
-        // Загружаем тему
-        try {
-            const theme = await GH.getTheme();
-            if (theme) {
-                applyTheme(theme);
-            } else {
-                applyTheme(DEFAULT_THEME);
-            }
-        } catch (e) {
-            applyTheme(DEFAULT_THEME);
-        }
+        try { const theme = await GH.getTheme(); applyTheme(theme || DEFAULT_THEME); }
+        catch (e) { applyTheme(DEFAULT_THEME); }
         renderAdminBtn();
         window.addEventListener('hashchange', route);
         route();
     }
-
     init();
     </script>
 </body>
